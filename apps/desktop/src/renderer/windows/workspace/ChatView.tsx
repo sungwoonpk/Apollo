@@ -231,9 +231,6 @@ export function ChatView({ settings, initialConvId }: ChatViewProps): React.JSX.
   const heroGreeting = (
     <div style={{ textAlign: 'center' }}>
       <div style={heroHeadingStyle}>
-        <span className="apollo-spark" aria-hidden="true" style={{ fontSize: '0.85em' }}>
-          ✳
-        </span>
         <span>{STRINGS.workspace.chat.emptyGreeting(name)}</span>
       </div>
     </div>

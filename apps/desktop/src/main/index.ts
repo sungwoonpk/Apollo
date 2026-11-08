@@ -70,6 +70,8 @@ import { applySkills, buildSystemPrompt } from './agent/systemPrompt';
 import { createAnthropicLlm } from './agent/llmAnthropic';
 import { resolveModelChoice, availableModels, availableModelsSchema } from '@apollo/shared';
 import { createBackendLlm } from './agent/llmBackend';
+import { createDemoFetch } from './net/demoFetch';
+import { createDemoLlm } from './agent/llmDemo';
 import { byokAllowedFromEnv, resolveMode } from './auth/mode';
 import { createSession } from './auth/session';
 import { runSignInFlow } from './auth/signInFlow';
@@ -124,7 +126,9 @@ function boot(): void {
   logger.info({ dev }, 'apollo booting');
 
   const config = loadConfig({ dotEnvPath: join(app.getAppPath(), '../../.env') });
-  const inMemory = dev && process.env['APOLLO_SMOKE'] === '1';
+  // Demo mode: dev builds only. Dummy data, scripted assistant, no keys, no network.
+  const demo = dev && process.env['APOLLO_DEMO'] === '1';
+  const inMemory = dev && (process.env['APOLLO_SMOKE'] === '1' || demo);
   const dbPath = join(userData, 'apollo.db');
 
   // H2 boot integrity: quick_check, and on failure quarantine + restore newest backup.
@@ -223,7 +227,24 @@ function boot(): void {
   }
   // Converge the OS login item with the setting at every boot.
   applyLoginItem(settings.get().launchAtLogin);
-  const secrets = createSecrets({ settings: repos.settings, codec: safeStorageCodec(safeStorage), env: config.env, log });
+  // Demo mode starts from a made-up profile so Home has a name, a place and weather.
+  if (demo && !settings.get().profile.homePlace) {
+    settings.patch({
+      profile: {
+        ...settings.get().profile,
+        name: 'Sungwoon',
+        homePlace: { label: 'San Francisco, California', lat: 37.77, lon: -122.42, tz: 'America/Los_Angeles' },
+      },
+    });
+  }
+  // Demo mode never reads real keys. The placeholder only makes the app report the
+  // assistant as configured; it is never sent anywhere (see createDemoLlm).
+  const secrets = createSecrets({
+    settings: repos.settings,
+    codec: safeStorageCodec(safeStorage),
+    env: demo ? { ANTHROPIC_API_KEY: 'demo-no-network' } : config.env,
+    log,
+  });
   const testKey = createKeyTester({ secrets, model: settings.get().anthropic.model });
 
   const emailService = createEmailService({
@@ -245,7 +266,7 @@ function boot(): void {
   // offline (A2/C17): it verifies the app's own wiring, not the backend's. Left
   // in managed mode it would fail on AUTH_REQUIRED at the first turn.
   const smoke = process.env['APOLLO_SMOKE'] === '1';
-  const appMode = smoke
+  const appMode = smoke || demo
     ? ('byok' as const)
     : resolveMode({ allowByok: byokAllowed, hasProviderKey: secrets.has('anthropic') });
   log(`operating mode: ${appMode}`);
@@ -259,7 +280,7 @@ function boot(): void {
   });
   // H4: use Electron's net.fetch transport (system proxy, PAC, OS cert store) while
   // preserving the httpClient interface, breaker, and egress allowlist.
-  const http = createHttpClient({ egress, breaker: createBreaker(), fetchFn: (url, init) => net.fetch(url as string, init), log });
+  const http = createHttpClient({ egress, breaker: createBreaker(), fetchFn: demo ? createDemoFetch() : (url, init) => net.fetch(url as string, init), log });
   // I4 user-link lane: the ONLY egress path that reaches arbitrary public hosts,
   // and only for user-provided links via link.read/link.preview. It replaces the
   // C14.9 allowlist with the SSRF guard; nothing else may use it.
@@ -346,8 +367,9 @@ function boot(): void {
    * L0.2 transport selection. Both branches satisfy the same LlmClient, so the
    * orchestrator, tools, and voice code below are identical in either mode.
    */
-  const llm =
-    appMode === 'byok'
+  const llm = demo
+    ? createDemoLlm()
+    : appMode === 'byok'
       ? createAnthropicLlm({
           apiKey: () => secrets.get('anthropic'),
           // The composer picker writes chat.model; anthropic.model (env-set)
@@ -966,6 +988,15 @@ function boot(): void {
     // managed asks the backend which keys the deployment actually holds, and a
     // failure degrades to Anthropic-only rather than an empty picker.
     chatModels: async () => {
+      // Demo mode has no real model behind it, so the picker says so. The id is
+      // the default one so the stored choice keeps resolving; it is never sent.
+      if (demo) {
+        return {
+          providers: [
+            { id: 'anthropic' as const, label: 'Demo', models: [{ id: 'claude-sonnet-4-6', label: 'Demo assistant' }], defaultModel: 'claude-sonnet-4-6' },
+          ],
+        };
+      }
       if (appMode === 'byok') return availableModels(['anthropic']);
       try {
         const token = await authSession.getAccessToken();

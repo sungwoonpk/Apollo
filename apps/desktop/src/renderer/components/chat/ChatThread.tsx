@@ -131,14 +131,6 @@ function ThreadRow({ item, convId, renderMessageActions, renderMessage }: {
         {item.content}
         {item.streaming ? <span aria-hidden style={{ color: 'var(--text-3)' }}>▌</span> : null}
       </div>
-      {/* The spark closes an assistant reply, marking where Apollo finished —
-          the role the avatar plays in the reference design, without stealing a
-          column of width from the text. */}
-      {!isUser && !item.streaming ? (
-        <div aria-hidden="true" style={{ marginTop: 'var(--sp-2)', fontSize: 18, color: 'var(--accent)' }}>
-          ✳
-        </div>
-      ) : null}
       {renderMessageActions && hover && !item.streaming ? (
         <div style={{ marginTop: 2, display: 'flex', gap: 'var(--sp-2)', justifyContent: isUser ? 'flex-end' : 'flex-start' }}>{renderMessageActions(item)}</div>
       ) : null}

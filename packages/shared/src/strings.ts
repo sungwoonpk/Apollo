@@ -631,7 +631,7 @@ export const STRINGS = {
     chat: {
       modelPicker: 'Model',
       composerPlaceholder: 'Message Apollo…',
-      composerPlaceholderHero: 'How can I help you today?',
+      composerPlaceholderHero: 'Tell Apollo what you need',
       send: 'Send',
       stop: 'Stop',
       sendHintEnter: 'Enter to send · Shift+Enter for a new line',

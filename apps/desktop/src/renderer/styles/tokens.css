@@ -1,9 +1,9 @@
 :root {
   --font-sans: Inter, system-ui, -apple-system, sans-serif;
-  --font-display: ui-serif, Georgia, 'Times New Roman', serif;
-  --accent: #D97757; --accent-soft: #F3E3DC;
-  --bg: #FAFAF7; --surface: #FFFFFF; --surface-2: #F1EFEA; --border: #E8E6E1;
-  --text-1: #1A1A18; --text-2: #6B6963; --text-3: #9C9A93;
+  --font-display: Inter, system-ui, -apple-system, sans-serif;
+  --accent: #0F766E; --accent-soft: #DDF1EE;
+  --bg: #F6F7F9; --surface: #FFFFFF; --surface-2: #ECEEF2; --border: #E1E4EA;
+  --text-1: #14171C; --text-2: #586070; --text-3: #8791A1;
   --danger: #C4442A; --success: #2E7D4F;
   --radius-ctl: 12px; --radius-card: 16px;
   --sp-1: 4px; --sp-2: 8px; --sp-3: 12px; --sp-4: 16px; --sp-5: 24px; --sp-6: 32px;
@@ -12,9 +12,9 @@
   --dur: 180ms; --ease: cubic-bezier(0.2, 0, 0, 1);
 }
 @media (prefers-color-scheme: dark) { :root {
-  --bg: #1C1C1E; --surface: #2A2A2C; --surface-2: #343436; --border: #3A3A3C;
-  --text-1: #F2F2F0; --text-2: #A8A7A1; --text-3: #6E6D68;
-  --accent-soft: #3A2E29; --shadow-card: 0 4px 24px rgba(0,0,0,0.35);
+  --bg: #13151A; --surface: #1C1F26; --surface-2: #262A33; --border: #2E333D;
+  --text-1: #F1F3F7; --text-2: #A2AABA; --text-3: #697284;
+  --accent: #0D9488; --accent-soft: #12312E; --shadow-card: 0 4px 24px rgba(0,0,0,0.35);
 }}
 
 * { box-sizing: border-box; }
@@ -216,7 +216,3 @@ select {
   }
 }
 
-/* Chat: the accent spark that marks Apollo speaking/thinking. */
-@keyframes apollo-spark-pulse { 0%,100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.55; transform: scale(0.88); } }
-.apollo-spark { color: var(--accent); display: inline-block; animation: apollo-spark-pulse 1.4s var(--ease) infinite; }
-@media (prefers-reduced-motion: reduce) { .apollo-spark { animation: none; } }

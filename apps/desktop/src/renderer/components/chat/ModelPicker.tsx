@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { resolveModelChoice, STRINGS, type AvailableModels, type LlmProviderId, type Settings } from '@apollo/shared';
 
 /**
- * The provider/model selector in the composer footer, ChatGPT/Claude style.
+ * The provider/model selector in the composer footer.
  * The choice persists in settings.chat and applies from the NEXT turn — a turn
  * in flight keeps the brain it started with.
  *

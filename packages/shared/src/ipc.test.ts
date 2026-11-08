@@ -56,25 +56,25 @@ const invokeFixtures: Record<InvokeChannelName, { req: unknown; res: unknown }> 
     req: { id: 'e1' },
     res: {
       id: 'e1', title: 'Dentist', startTs: 1_800_000_000_000, endTs: null, tz: 'America/Los_Angeles',
-      allDay: false, rrule: null, location: null, notes: null, calendarId: 'default', color: '#D97757',
+      allDay: false, rrule: null, location: null, notes: null, calendarId: 'default', color: '#0F766E',
     },
   },
   'events.search': {
     req: { query: 'dentist' },
-    res: [{ id: 'e1', title: 'Dentist', startTs: 1_800_000_000_000, endTs: null, tz: 'America/Los_Angeles', allDay: false, rrule: null, location: null, notes: null, calendarId: 'default', color: '#D97757' }],
+    res: [{ id: 'e1', title: 'Dentist', startTs: 1_800_000_000_000, endTs: null, tz: 'America/Los_Angeles', allDay: false, rrule: null, location: null, notes: null, calendarId: 'default', color: '#0F766E' }],
   },
   'events.create': {
     req: { title: 'Standup', startIso: '2026-07-14T09:00:00', tz: 'LOCAL' },
     res: {
       id: 'e2', title: 'Standup', startTs: 1_800_000_000_000, endTs: 1_800_003_600_000,
-      tz: 'America/Los_Angeles', allDay: false, rrule: null, location: null, notes: null, calendarId: 'default', color: '#D97757',
+      tz: 'America/Los_Angeles', allDay: false, rrule: null, location: null, notes: null, calendarId: 'default', color: '#0F766E',
     },
   },
   'events.update': {
     req: { id: 'e1', patch: { title: 'Dentist (moved)' }, scope: 'all' },
     res: {
       id: 'e1', title: 'Dentist (moved)', startTs: 1_800_000_000_000, endTs: null,
-      tz: 'America/Los_Angeles', allDay: false, rrule: null, location: null, notes: null, calendarId: 'default', color: '#D97757',
+      tz: 'America/Los_Angeles', allDay: false, rrule: null, location: null, notes: null, calendarId: 'default', color: '#0F766E',
     },
   },
   'events.delete': { req: { id: 'e1', scope: 'single', occStartTs: 1_800_000_000_000 }, res: { ok: true } },
