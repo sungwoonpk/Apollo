@@ -24,7 +24,27 @@ jobs:
       # toolchain must exist for the cases where a build is unavoidable.
       - uses: ilammy/msvc-dev-cmd@v1
         if: runner.os == 'Windows'
+      # The Electron binary is downloaded from GitHub releases, which now and then
+      # answers 504. Cache it, and fetch it in its own step with retries, so one bad
+      # response cannot fail the tests that need the real binary.
+      - name: Cache the Electron binary
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/Library/Caches/electron
+            ~/AppData/Local/electron/Cache
+            ~/.cache/electron
+          key: electron-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
       - run: pnpm i --frozen-lockfile
+      - name: Download the Electron binary (with retries)
+        shell: bash
+        run: |
+          for attempt in 1 2 3 4 5; do
+            node node_modules/electron/install.js && exit 0
+            echo "Electron download failed (attempt $attempt of 5), retrying in 20s"
+            sleep 20
+          done
+          exit 1
       - run: pnpm lint
       - run: pnpm -r typecheck
       - run: pnpm -r test
@@ -42,7 +62,27 @@ jobs:
         with:
           node-version: 22
           cache: pnpm
+      # The Electron binary is downloaded from GitHub releases, which now and then
+      # answers 504. Cache it, and fetch it in its own step with retries, so one bad
+      # response cannot fail the tests that need the real binary.
+      - name: Cache the Electron binary
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/Library/Caches/electron
+            ~/AppData/Local/electron/Cache
+            ~/.cache/electron
+          key: electron-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
       - run: pnpm i --frozen-lockfile
+      - name: Download the Electron binary (with retries)
+        shell: bash
+        run: |
+          for attempt in 1 2 3 4 5; do
+            node node_modules/electron/install.js && exit 0
+            echo "Electron download failed (attempt $attempt of 5), retrying in 20s"
+            sleep 20
+          done
+          exit 1
       # These steps invoke vitest directly, bypassing `pretest`. Verify (and
       # repair, if a cached binary was built under a different Node) the
       # better-sqlite3 ABI before any suite touches the database.
