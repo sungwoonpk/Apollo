@@ -12,7 +12,12 @@ import { FakeLlm, type FakeStep } from './llmFake';
  */
 export function createDemoLlm(now: () => DateTime = () => DateTime.local()): LlmClient {
   return {
-    stream: (req) => new FakeLlm([stepFor(req, now())]).stream(req),
+    stream: (req) => {
+      const step = stepFor(req, now());
+      // A short pause keeps message timestamps apart, so a reply never sorts
+      // above the message it answers, and reads like someone thinking.
+      return new FakeLlm([{ ...step, delayMs: 350 }]).stream(req);
+    },
   };
 }
 
@@ -74,6 +79,9 @@ function closing(results: Array<{ content: string; isError: boolean }>): FakeSte
   if (first.isError || first.content.startsWith('ERROR')) return { text: 'That did not work. Try rephrasing it.' };
   if (/^\d+\.\s/.test(first.content)) return { text: 'Here is what I found.' };
   const line = first.content.split('\n')[0]?.trim() ?? '';
+  // A list result ("1 event:" or "No events.") is shown as a card; do not echo its header.
+  if (line.endsWith(':')) return { text: 'Here is your day.' };
+  if (/^no\b/i.test(line)) return { text: 'Nothing on the calendar for that day.' };
   return { text: line ? `Done. ${line}` : 'Done.' };
 }
 

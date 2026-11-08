@@ -70,6 +70,7 @@ import { applySkills, buildSystemPrompt } from './agent/systemPrompt';
 import { createAnthropicLlm } from './agent/llmAnthropic';
 import { resolveModelChoice, availableModels, availableModelsSchema } from '@apollo/shared';
 import { createBackendLlm } from './agent/llmBackend';
+import { createDemoFetch } from './net/demoFetch';
 import { createDemoLlm } from './agent/llmDemo';
 import { byokAllowedFromEnv, resolveMode } from './auth/mode';
 import { createSession } from './auth/session';
@@ -226,6 +227,16 @@ function boot(): void {
   }
   // Converge the OS login item with the setting at every boot.
   applyLoginItem(settings.get().launchAtLogin);
+  // Demo mode starts from a made-up profile so Home has a name, a place and weather.
+  if (demo && !settings.get().profile.homePlace) {
+    settings.patch({
+      profile: {
+        ...settings.get().profile,
+        name: 'Sam',
+        homePlace: { label: 'San Francisco, California', lat: 37.77, lon: -122.42, tz: 'America/Los_Angeles' },
+      },
+    });
+  }
   // Demo mode never reads real keys. The placeholder only makes the app report the
   // assistant as configured; it is never sent anywhere (see createDemoLlm).
   const secrets = createSecrets({
@@ -269,7 +280,7 @@ function boot(): void {
   });
   // H4: use Electron's net.fetch transport (system proxy, PAC, OS cert store) while
   // preserving the httpClient interface, breaker, and egress allowlist.
-  const http = createHttpClient({ egress, breaker: createBreaker(), fetchFn: (url, init) => net.fetch(url as string, init), log });
+  const http = createHttpClient({ egress, breaker: createBreaker(), fetchFn: demo ? createDemoFetch() : (url, init) => net.fetch(url as string, init), log });
   // I4 user-link lane: the ONLY egress path that reaches arbitrary public hosts,
   // and only for user-provided links via link.read/link.preview. It replaces the
   // C14.9 allowlist with the SSRF guard; nothing else may use it.
@@ -977,6 +988,15 @@ function boot(): void {
     // managed asks the backend which keys the deployment actually holds, and a
     // failure degrades to Anthropic-only rather than an empty picker.
     chatModels: async () => {
+      // Demo mode has no real model behind it, so the picker says so. The id is
+      // the default one so the stored choice keeps resolving; it is never sent.
+      if (demo) {
+        return {
+          providers: [
+            { id: 'anthropic' as const, label: 'Demo', models: [{ id: 'claude-sonnet-4-6', label: 'Demo assistant' }], defaultModel: 'claude-sonnet-4-6' },
+          ],
+        };
+      }
       if (appMode === 'byok') return availableModels(['anthropic']);
       try {
         const token = await authSession.getAccessToken();
