@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { openDb, type Db } from '../db/connection';
 import { migrate } from '../db/migrate';
 import { createRepos, type Repos } from '../db/repos/index';
-import { canonicalUrl, createNewsTool } from './news';
+import { canonicalUrl, createNewsTool, fetchHeadlines } from './news';
 import { createRegistry, type Registry } from './registry';
 import { makeCtx } from './registry.test';
 import type { HttpClient } from '../net/httpClient';
@@ -119,5 +119,51 @@ describe('news.brief', () => {
       throw new Error('nope');
     });
     expect((await regDead.execute('news.brief', {}, makeCtx())).llmText).toMatch(/^ERROR no feed could be fetched/);
+  });
+});
+
+describe('fetchHeadlines (Today news)', () => {
+  const http = (getText: (url: string) => Promise<string>): HttpClient => ({
+    getJson: vi.fn(async () => ({})),
+    getText: vi.fn(async (url: string) => getText(url)),
+    postJson: vi.fn(async () => ({})),
+  });
+
+  it('returns newest first, deduplicated, capped at the limit, with no LLM involved', async () => {
+    repos.feeds.seed([{ url: 'https://a.example/feed', category: 'news' }]);
+    const items = Array.from({ length: 8 }, (_, i) => ({
+      title: `Story ${i}`,
+      link: `https://a.example/s${i % 7}`, // the last one repeats the first link
+      date: `Sun, 08 Nov 2026 0${i}:00:00 GMT`,
+    }));
+    const out = await fetchHeadlines({ http: http(async () => rss('A', items)), feeds: repos.feeds }, 5);
+    expect(out).toHaveLength(5);
+    expect(out[0]?.title).toBe('Story 7');
+    const urls = out.map((o) => o.url);
+    expect(new Set(urls).size).toBe(urls.length);
+  });
+
+  it('survives a failing feed and returns the rest', async () => {
+    repos.feeds.seed([
+      { url: 'https://bad.example/feed', category: 'news' },
+      { url: 'https://ok.example/feed', category: 'news' },
+    ]);
+    const out = await fetchHeadlines(
+      {
+        http: http(async (url) => {
+          if (url.includes('bad')) throw new Error('down');
+          return rss('OK', [{ title: 'Fine', link: 'https://ok.example/1', date: 'Sun, 08 Nov 2026 01:00:00 GMT' }]);
+        }),
+        feeds: repos.feeds,
+      },
+      5,
+    );
+    expect(out).toEqual([{ title: 'Fine', source: 'OK', url: 'https://ok.example/1' }]);
+  });
+
+  it('is empty when every feed fails', async () => {
+    repos.feeds.seed([{ url: 'https://bad.example/feed', category: 'news' }]);
+    const out = await fetchHeadlines({ http: http(async () => { throw new Error('down'); }), feeds: repos.feeds }, 5);
+    expect(out).toEqual([]);
   });
 });

@@ -4,6 +4,8 @@
  * the computer. The real parsing and rendering code still runs on these
  * responses. Any other URL answers 503, which the callers already handle.
  */
+import { DateTime } from 'luxon';
+
 export function createDemoFetch(now: () => Date = () => new Date()): typeof fetch {
   return async (input) => {
     const url = new URL(typeof input === 'string' ? input : input instanceof URL ? input.href : input.url);
@@ -22,7 +24,8 @@ const json = (body: unknown): Response => new Response(JSON.stringify(body), { s
 function forecast(now: Date): unknown {
   const days = Array.from({ length: 5 }, (_, i) => new Date(now.getTime() + i * 86_400_000).toISOString().slice(0, 10));
   return {
-    current: { temperature_2m: 61, apparent_temperature: 59, weather_code: 2, wind_speed_10m: 9, precipitation_probability: 10 },
+    current: { temperature_2m: 61, apparent_temperature: 59, weather_code: 2, precipitation: 0, wind_speed_10m: 9, precipitation_probability: 10 },
+    hourly: hourly(now),
     daily: {
       time: days,
       temperature_2m_max: [63, 65, 60, 58, 62],
@@ -30,6 +33,18 @@ function forecast(now: Date): unknown {
       weather_code: [2, 1, 61, 3, 0],
       precipitation_probability_max: [10, 5, 60, 30, 0],
     },
+  };
+}
+
+/** 48 hours from local midnight in the demo home time zone, in the shape the real API returns. */
+function hourly(now: Date): unknown {
+  const start = DateTime.fromJSDate(now, { zone: 'America/Los_Angeles' }).startOf('day');
+  const hours = Array.from({ length: 48 }, (_, i) => start.plus({ hours: i }));
+  return {
+    time: hours.map((h) => h.toISO({ includeOffset: false, suppressSeconds: true, suppressMilliseconds: true })),
+    temperature_2m: hours.map((h) => Math.round(54 + 9 * Math.sin(((h.hour - 9) / 24) * 2 * Math.PI))),
+    precipitation_probability: hours.map((h) => (h.hour >= 16 && h.hour <= 19 ? 20 : 5)),
+    weather_code: hours.map((h) => (h.hour >= 7 && h.hour <= 18 ? 2 : 0)),
   };
 }
 
