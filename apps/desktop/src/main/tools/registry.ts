@@ -1,4 +1,4 @@
-import { zodToJsonSchema } from 'zod-to-json-schema';
+import { z } from 'zod';
 import { AppError, isDiskFullError, type ToolCtx, type ToolDef, type ToolResult } from '@apollo/shared';
 
 export interface AnthropicToolJson {
@@ -54,7 +54,7 @@ export function createRegistry(tools: ToolDef[], opts: RegistryOpts = {}) {
     /** Tool JSON for the Anthropic API, generated from each tool's zod params. */
     anthropicTools(): AnthropicToolJson[] {
       return this.all().map((t) => {
-        const schema = zodToJsonSchema(t.params, { $refStrategy: 'none' }) as Record<string, unknown>;
+        const schema = z.toJSONSchema(t.params, { target: 'draft-7', reused: 'inline' }) as Record<string, unknown>;
         delete schema['$schema'];
         return { name: t.name, description: t.description, input_schema: schema };
       });
