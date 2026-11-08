@@ -423,3 +423,27 @@ throws `OFFLINE`, and the location picker distinguishes a failed lookup from a
 genuine no-match with a retry message. Device enumeration keeps returning an
 empty list (an empty device menu is honest) but now logs the cause, which it
 previously swallowed entirely.
+
+## 2026-11-08 dependency audit and the zod 4 upgrade
+
+The `gates` job had failed on every push because `pnpm audit --prod --audit-level
+high` reported real advisories (103 in 19 packages, 1 critical in `dompurify`). The
+workflow only tolerated a retired audit endpoint, and the endpoint is back. The
+fix patches the dependencies, it does not loosen the gate.
+
+- Directly used packages were updated inside their ranges: `electron`, `vitest`,
+  `vite`, `@tiptap/core`, `@tiptap/pm`, `dompurify`, `jsdom`, `electron-updater`,
+  `fastify`, `msedge-tts`, `@huggingface/transformers`, `adm-zip`.
+- Transitive packages are fixed with ten `pnpm.overrides`, one per package and
+  major version. Every override uses a caret (`^x.y.z`) so it can never jump to a
+  newer major. A first attempt used `>=x.y.z`, which pulled `undici` 8 (needs Node
+  22.19) into a project that supports Node 20.
+- `zod` moved from 3 to 4. The advisory is only patched in 4.x. Changes: one-argument
+  `z.record(x)` became `z.record(z.string(), x)`, object defaults that rely on inner
+  defaults became `.prefault({})`, and `zod-to-json-schema` was replaced by zod 4's
+  built-in `z.toJSONSchema` (the dependency is removed). No runtime behavior of the
+  tools or settings changed; the suites (1,270 tests) pass unchanged.
+- Accepted, not fixed: `glob` and `minimatch` (moderate) and `deepmerge` (low).
+  `deepmerge` has no patched release. The other two are only patched several majors
+  up and are used by `rimraf` under `googleapis`; forcing them would break that
+  chain. The gate stays at `high`, so these do not fail it.
