@@ -232,7 +232,7 @@ function boot(): void {
     settings.patch({
       profile: {
         ...settings.get().profile,
-        name: 'Sam',
+        name: 'Sungwoon',
         homePlace: { label: 'San Francisco, California', lat: 37.77, lon: -122.42, tz: 'America/Los_Angeles' },
       },
     });
