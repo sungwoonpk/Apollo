@@ -4,7 +4,7 @@ import type { EventDTO } from '@apollo/shared';
 
 const base: EventDTO = {
   id: 'e1', title: 'Team; sync', startTs: Date.UTC(2026, 6, 15, 16, 0), endTs: Date.UTC(2026, 6, 15, 17, 0),
-  tz: 'UTC', allDay: false, rrule: null, location: 'Room 2, floor 3', notes: 'bring notes', calendarId: 'default', color: '#4F46E5',
+  tz: 'UTC', allDay: false, rrule: null, location: 'Room 2, floor 3', notes: 'bring notes', calendarId: 'default', color: '#0F766E',
 };
 
 describe('eventToIcs', () => {

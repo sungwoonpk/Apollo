@@ -8,17 +8,17 @@ import { type CalendarCollection } from './settings';
  * the format.ts context pattern.
  */
 export const DEFAULT_CALENDAR_ID = 'default';
-export const DEFAULT_CALENDAR_COLOR = '#4F46E5';
+export const DEFAULT_CALENDAR_COLOR = '#0F766E';
 
-/** Fixed palette (Apollo indigo first). Google colors map to the nearest. */
+/** Fixed palette (Apollo teal first). Google colors map to the nearest. */
 export const CALENDAR_PALETTE: readonly string[] = [
-  '#4F46E5', // indigo (default)
+  '#0F766E', // teal (default)
   '#4C8BF5', // blue
   '#34A853', // green
   '#A142F4', // purple
   '#F4B400', // amber
   '#EA4335', // red
-  '#00ACC1', // teal
+  '#00ACC1', // cyan
   '#7986CB', // periwinkle
   '#8D6E63', // brown
   '#757575', // gray

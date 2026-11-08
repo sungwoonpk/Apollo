@@ -3,7 +3,7 @@
  * apps/desktop/src/renderer/styles/tokens.css. */
 :root {
   --font-sans: Inter, system-ui, -apple-system, sans-serif;
-  --accent: #4F46E5; --accent-soft: #E8E7FB;
+  --accent: #0F766E; --accent-soft: #DDF1EE;
   --bg: #F6F7F9; --surface: #FFFFFF; --border: #E1E4EA;
   --text-1: #14171C; --text-2: #586070; --text-3: #8791A1;
   --danger: #C4442A; --success: #2E7D4F;
@@ -16,7 +16,7 @@
 @media (prefers-color-scheme: dark) { :root {
   --bg: #13151A; --surface: #1C1F26; --border: #2E333D;
   --text-1: #F1F3F7; --text-2: #A2AABA; --text-3: #697284;
-  --accent: #6366F1; --accent-soft: #262A4D; --shadow-card: 0 4px 24px rgba(0,0,0,0.35);
+  --accent: #0D9488; --accent-soft: #12312E; --shadow-card: 0 4px 24px rgba(0,0,0,0.35);
 }}
 
 * { box-sizing: border-box; }
