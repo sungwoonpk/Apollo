@@ -70,6 +70,7 @@ import { applySkills, buildSystemPrompt } from './agent/systemPrompt';
 import { createAnthropicLlm } from './agent/llmAnthropic';
 import { resolveModelChoice, availableModels, availableModelsSchema } from '@apollo/shared';
 import { createBackendLlm } from './agent/llmBackend';
+import { createDemoLlm } from './agent/llmDemo';
 import { byokAllowedFromEnv, resolveMode } from './auth/mode';
 import { createSession } from './auth/session';
 import { runSignInFlow } from './auth/signInFlow';
@@ -124,7 +125,9 @@ function boot(): void {
   logger.info({ dev }, 'apollo booting');
 
   const config = loadConfig({ dotEnvPath: join(app.getAppPath(), '../../.env') });
-  const inMemory = dev && process.env['APOLLO_SMOKE'] === '1';
+  // Demo mode: dev builds only. Dummy data, scripted assistant, no keys, no network.
+  const demo = dev && process.env['APOLLO_DEMO'] === '1';
+  const inMemory = dev && (process.env['APOLLO_SMOKE'] === '1' || demo);
   const dbPath = join(userData, 'apollo.db');
 
   // H2 boot integrity: quick_check, and on failure quarantine + restore newest backup.
@@ -223,7 +226,14 @@ function boot(): void {
   }
   // Converge the OS login item with the setting at every boot.
   applyLoginItem(settings.get().launchAtLogin);
-  const secrets = createSecrets({ settings: repos.settings, codec: safeStorageCodec(safeStorage), env: config.env, log });
+  // Demo mode never reads real keys. The placeholder only makes the app report the
+  // assistant as configured; it is never sent anywhere (see createDemoLlm).
+  const secrets = createSecrets({
+    settings: repos.settings,
+    codec: safeStorageCodec(safeStorage),
+    env: demo ? { ANTHROPIC_API_KEY: 'demo-no-network' } : config.env,
+    log,
+  });
   const testKey = createKeyTester({ secrets, model: settings.get().anthropic.model });
 
   const emailService = createEmailService({
@@ -245,7 +255,7 @@ function boot(): void {
   // offline (A2/C17): it verifies the app's own wiring, not the backend's. Left
   // in managed mode it would fail on AUTH_REQUIRED at the first turn.
   const smoke = process.env['APOLLO_SMOKE'] === '1';
-  const appMode = smoke
+  const appMode = smoke || demo
     ? ('byok' as const)
     : resolveMode({ allowByok: byokAllowed, hasProviderKey: secrets.has('anthropic') });
   log(`operating mode: ${appMode}`);
@@ -346,8 +356,9 @@ function boot(): void {
    * L0.2 transport selection. Both branches satisfy the same LlmClient, so the
    * orchestrator, tools, and voice code below are identical in either mode.
    */
-  const llm =
-    appMode === 'byok'
+  const llm = demo
+    ? createDemoLlm()
+    : appMode === 'byok'
       ? createAnthropicLlm({
           apiKey: () => secrets.get('anthropic'),
           // The composer picker writes chat.model; anthropic.model (env-set)
