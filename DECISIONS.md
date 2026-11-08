@@ -447,3 +447,27 @@ fix patches the dependencies, it does not loosen the gate.
   `deepmerge` has no patched release. The other two are only patched several majors
   up and are used by `rimraf` under `googleapis`; forcing them would break that
   chain. The gate stays at `high`, so these do not fail it.
+
+## 2026-11-08 demo mode, and a look of its own
+
+The README had no screenshots, and the app could only be shown with real keys. The
+owner asked for no keys anywhere in the project's media and for everything to be
+filled with made-up data (issue #1).
+
+- `APOLLO_DEMO=1` starts a dev-only demo mode. It is ignored in packaged builds. It
+  uses an in-memory database, a scripted assistant (`agent/llmDemo.ts`, which calls
+  the real tools so cards are real), and a canned transport (`net/demoFetch.ts`) for
+  weather and news, so the real parsing and rendering code still runs.
+- Demo mode never reads real keys. The secrets store is handed one placeholder value
+  so the app reports the assistant as available; it is never sent anywhere because
+  the scripted assistant makes no requests. The picker shows "Demo assistant".
+- The profile is seeded with a name (Park) and a home place so Home has a greeting
+  and weather.
+- The UI no longer borrows another product's look: the star mark, the warm orange
+  accent, the cream background, the serif display font and the greeting copy are
+  replaced by a teal accent, a neutral background and a sans display font.
+- Fixed on the way: the Today news section was always empty because `getNews` was
+  never passed to the provider (issue #6). The headlines now share feed loading with
+  `news.brief` and need no LLM.
+- Screenshots and the GIF in `docs/images/` come from a keyless temporary profile in
+  demo mode, in light and dark.
