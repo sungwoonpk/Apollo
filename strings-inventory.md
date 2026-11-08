@@ -5,7 +5,7 @@ Use this for the C10/C18 tone review (sentence case, no corporate filler, presen
 
 Regenerate with `node apps/desktop/scripts/gen-strings-inventory.mjs` after changing strings.ts.
 
-Total user-facing strings: 626 (544 literal, 82 templated)
+Total user-facing strings: 633 (550 literal, 83 templated)
 
 | key | copy |
 |-----|------|
@@ -22,6 +22,8 @@ Total user-facing strings: 626 (544 literal, 82 templated)
 | `errors.KEY_MISSING` | _(template, 1 arg)_ |
 | `errors.KEY_INVALID` | _(template, 1 arg)_ |
 | `errors.RATE_LIMITED` | "That service is busy right now. I'll be ready to retry in a moment." |
+| `errors.CAPABILITY_OFF` | _(template, 1 arg)_ |
+| `errors.ACCOUNT_NOT_CONNECTED` | "Connect your Google account in Settings > Accounts to use email." |
 | `errors.OFFLINE` | _(template, 2 args)_ |
 | `errors.STT_DOWN` | "My hearing is acting up. You can keep typing to me." |
 | `errors.TTS_DOWN` | "I lost my voice for a moment; I'll answer as text and cards until it's back." |
@@ -140,10 +142,8 @@ Total user-facing strings: 626 (544 literal, 82 templated)
 | `onboarding.accountTitle` | "Sign in to Apollo" |
 | `onboarding.accountBody` | "Signing in turns on the assistant. Notes, calendar, timers, and reminders all work without it, and stay on this device either way." |
 | `onboarding.accountSignedIn` | "You're signed in." |
-| `onboarding.keysTitle` | "Connect your keys" |
-| `onboarding.keysBody` | "This is a developer build, so it uses your own provider keys. Anthropic and Deepgram are required; the others unlock extras and can wait." |
-| `onboarding.finishTitle` | "You're set" |
-| `onboarding.finishBody` | "Say \"Hey Apollo\", or type in the Chat tab: \"set a timer for 5 minutes\"." |
+| `onboarding.keysTitle` | "Set up the assistant" |
+| `onboarding.keysBody` | "This build runs on your own machine. Setup lives in Settings and can wait — notes, calendar, timers, and reminders work right now." |
 | `onboarding.next` | "Next" |
 | `onboarding.back` | "Back" |
 | `onboarding.skip` | "Skip" |
@@ -166,8 +166,8 @@ Total user-facing strings: 626 (544 literal, 82 templated)
 | `onboarding.sampleNote` | "Add a welcome note with example prompts" |
 | `onboarding.signInBanner` | "Sign in to use Apollo’s assistant." |
 | `onboarding.signInAction` | "Sign in" |
-| `onboarding.byokKeysBanner` | "Add your provider keys in Settings → Keys to enable the assistant." |
-| `onboarding.byokKeysAction` | "Open Keys" |
+| `onboarding.byokKeysBanner` | "The assistant isn't set up yet. Everything local still works." |
+| `onboarding.byokKeysAction` | "Set up" |
 | `onboarding.dismiss` | "Dismiss" |
 | `onboarding.welcomeNote` | "Things you can ask Apollo\n\n• \"Set a timer for 10 minutes\"\n• \"What's the weather this weekend?\"\n• \"Put dentist on my calendar Tuesday at 3\"\n• \"Remind me to call mom tomorrow at 6\"\n• \"Take a note: the wifi password is hunter2\"\n• \"What did I say about the drone idea?\"\n• Paste a link and ask \"what does this say?\"\n\nThis is a normal note — edit it or delete it whenever you like." |
 | `settings.tabs.general` | "General" |
@@ -256,8 +256,7 @@ Total user-facing strings: 626 (544 literal, 82 templated)
 | `settings.account.usageResets` | _(template, 1 arg)_ |
 | `settings.account.nearLimit` | "You're close to this period's limit." |
 | `settings.account.overLimit` | "You've used this period's requests. Local features keep working." |
-| `settings.account.managePlan` | "Manage plan" |
-| `settings.account.byokNotice` | "This is a developer build using your own provider keys. Sign-in is not used." |
+| `settings.account.byokNotice` | "This build runs entirely on your own machine. No account needed." |
 | `settings.calendars.title` | "Calendars" |
 | `settings.calendars.subtitle` | "Organize events into color-coded calendars." |
 | `settings.calendars.addNew` | "Add calendar" |
@@ -272,6 +271,11 @@ Total user-facing strings: 626 (544 literal, 82 templated)
 | `settings.calendars.reassignConfirm` | "Move and delete" |
 | `settings.calendars.cancel` | "Cancel" |
 | `settings.calendars.cannotDeleteLast` | "You need at least one calendar." |
+| `settings.calendars.genericError` | "That didn't work. Try again." |
+| `settings.calendars.hasEvents` | "That calendar still has events. Move them to another calendar first." |
+| `settings.calendars.cannotDeleteDefault` | "The default calendar cannot be deleted." |
+| `settings.calendars.notFound` | "That calendar no longer exists." |
+| `settings.calendars.invalidReassign` | "Pick a different calendar to move those events to." |
 | `settings.proactive.title` | "Proactive nudges" |
 | `settings.proactive.master` | "Let Apollo nudge me" |
 | `settings.proactive.maxPerDay` | "Maximum nudges per day" |
@@ -288,7 +292,6 @@ Total user-facing strings: 626 (544 literal, 82 templated)
 | `settings.general.launchAtLogin` | "Launch at login" |
 | `settings.general.advanced` | "Advanced" |
 | `settings.general.orbEdge` | "Orb edge" |
-| `settings.general.homeLocation` | "Location" |
 | `settings.general.openWorkspaceOnLaunch` | "Open Workspace on launch" |
 | `settings.general.defaultView` | "Workspace opens to" |
 | `settings.general.chatSendOnEnter` | "Enter sends chat messages" |
@@ -313,6 +316,7 @@ Total user-facing strings: 626 (544 literal, 82 templated)
 | `settings.profile.imperial` | "Fahrenheit" |
 | `settings.profile.metric` | "Celsius" |
 | `settings.profile.timeFormat` | "Time format" |
+| `settings.profile.locationLookupFailed` | "Couldn't reach the location service. Check your connection and try again." |
 | `settings.profile.h12` | "12-hour" |
 | `settings.profile.h24` | "24-hour" |
 | `settings.profile.weekStart` | "Week starts on" |
@@ -456,12 +460,14 @@ Total user-facing strings: 626 (544 literal, 82 templated)
 | `a11y.voiceState.muted` | "Muted" |
 | `a11y.voiceState.error` | "Voice error" |
 | `a11y.nudge` | "You have a nudge" |
-| `a11y.copyReply` | "Copy reply" |
 | `a11y.copy` | "Copy" |
 | `a11y.color` | "Color" |
 | `alerts.timer` | "Timer" |
 | `alerts.alarm` | "Alarm" |
+| `alerts.reminder` | "Reminder" |
 | `alerts.dismiss` | "Dismiss" |
+| `alerts.complete` | "Done" |
+| `alerts.remindLater` | "Not now" |
 | `alerts.snoozeMin` | _(template, 1 arg)_ |
 | `alerts.since` | _(template, 1 arg)_ |
 | `alerts.now` | "now" |
@@ -487,7 +493,7 @@ Total user-facing strings: 626 (544 literal, 82 templated)
 | `workspace.accountMenu.signedOut` | "Not signed in" |
 | `workspace.accountMenu.signInPrompt` | "Sign in to use the assistant" |
 | `workspace.accountMenu.localProfile` | "This device" |
-| `workspace.accountMenu.byokSubtitle` | "Developer build" |
+| `workspace.accountMenu.byokSubtitle` | "On this device" |
 | `workspace.accountMenu.plan` | _(template, 1 arg)_ |
 | `workspace.undo.undid` | _(template, 1 arg)_ |
 | `workspace.undo.nothing` | "Nothing to undo" |
@@ -497,6 +503,7 @@ Total user-facing strings: 626 (544 literal, 82 templated)
 | `workspace.chats.deleteConfirm` | "Delete this conversation and its indexed messages?" |
 | `workspace.chat.modelPicker` | "Model" |
 | `workspace.chat.composerPlaceholder` | "Message Apollo…" |
+| `workspace.chat.composerPlaceholderHero` | "Tell Apollo what you need" |
 | `workspace.chat.send` | "Send" |
 | `workspace.chat.stop` | "Stop" |
 | `workspace.chat.sendHintEnter` | "Enter to send · Shift+Enter for a new line" |
@@ -520,10 +527,10 @@ Total user-facing strings: 626 (544 literal, 82 templated)
 | `workspace.chat.editCancel` | "Cancel" |
 | `workspace.chat.speakThis` | "Speak this" |
 | `workspace.chat.dictate` | "Dictate into the composer" |
-| `workspace.chat.dictateUnavailable` | "Add a Deepgram key to dictate" |
+| `workspace.chat.dictateUnavailable` | "Dictation is unavailable right now" |
 | `workspace.chat.dictating` | "Listening… tap to stop" |
 | `workspace.chat.degradedBanner` | _(template, 1 arg)_ |
-| `workspace.chat.degradedLlm` | "The assistant brain (Anthropic key)" |
+| `workspace.chat.degradedLlm` | "The assistant" |
 | `workspace.chat.historyDisabled` | "Conversation history is off, so chats are not saved. You can still chat; turn history on in Settings → Privacy." |
 | `workspace.chat.historyDisabledLink` | "Open Privacy settings" |
 | `workspace.chat.rename` | "Rename" |

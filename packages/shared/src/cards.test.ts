@@ -6,7 +6,7 @@ import { SettingsSchema, defaultSettings, migrateLegacySettings } from './settin
 const event = {
   id: 'e1', title: 'Dentist', startTs: 1_800_000_000_000, endTs: 1_800_003_600_000,
   tz: 'America/Los_Angeles', allDay: false, rrule: null, location: null, notes: null,
-  calendarId: 'default', color: '#D97757',
+  calendarId: 'default', color: '#4F46E5',
 };
 
 const samples: CardPayload[] = [

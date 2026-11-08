@@ -10,14 +10,14 @@ import {
 } from './index';
 
 const list: CalendarCollection[] = [
-  { id: 'default', name: 'Personal', color: '#D97757', kind: 'local', readOnly: false },
+  { id: 'default', name: 'Personal', color: '#4F46E5', kind: 'local', readOnly: false },
   { id: 'work', name: 'Work', color: '#4C8BF5', kind: 'local', readOnly: false },
 ];
 
 describe('calendar color derivation', () => {
   it('resolves the color for a known id from an explicit list', () => {
     expect(calendarColor('work', list)).toBe('#4C8BF5');
-    expect(calendarColor('default', list)).toBe('#D97757');
+    expect(calendarColor('default', list)).toBe('#4F46E5');
   });
 
   it('falls back to the default color for an unknown id', () => {

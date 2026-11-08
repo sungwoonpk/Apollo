@@ -3,7 +3,7 @@ import { applyCalendarCrud, type CalendarsState } from './service';
 
 function base(): CalendarsState {
   return {
-    active: [{ id: 'default', name: 'Personal', color: '#D97757', kind: 'local', readOnly: false }],
+    active: [{ id: 'default', name: 'Personal', color: '#4F46E5', kind: 'local', readOnly: false }],
     defaultCalendarId: 'default',
   };
 }

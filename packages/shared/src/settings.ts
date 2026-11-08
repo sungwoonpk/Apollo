@@ -189,7 +189,7 @@ export const SettingsSchema = z.object({
             readOnly: z.boolean().default(false),
           }),
         )
-        .default([{ id: 'default', name: 'Personal', color: '#D97757', kind: 'local', readOnly: false }]),
+        .default([{ id: 'default', name: 'Personal', color: '#4F46E5', kind: 'local', readOnly: false }]),
       defaultCalendarId: z.string().default('default'),
     })
     .prefault({}),

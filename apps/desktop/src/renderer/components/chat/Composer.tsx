@@ -64,7 +64,7 @@ export function Composer(p: ComposerProps): React.JSX.Element {
           </div>
         ) : null}
         {/* One rounded card holds everything — the textarea rides on top, the
-            controls sit in a row inside the card, Claude-style. */}
+            controls sit in a row inside the card. */}
         <div style={cardStyle}>
           <textarea
             ref={areaRef}
