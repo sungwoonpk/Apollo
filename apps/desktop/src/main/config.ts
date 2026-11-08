@@ -13,7 +13,7 @@ const ConfigSchema = z.object({
   backendBaseUrl: z.string().url().default('https://api.apolloassistant.app'),
   oidcAuthorizeUrl: z.string().url().default('https://auth.apolloassistant.app/authorize'),
   oidcClientId: z.string().default('apollo-desktop'),
-  env: z.record(z.string()),
+  env: z.record(z.string(), z.string()),
 });
 
 export type AppConfig = Readonly<z.infer<typeof ConfigSchema>>;

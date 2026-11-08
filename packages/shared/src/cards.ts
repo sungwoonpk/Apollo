@@ -106,7 +106,7 @@ export const emailDetailSchema: z.ZodType<EmailDetailSanitized> = z.object({
 export const confirmActionSchema: z.ZodType<ConfirmAction> = z.object({
   toolName: z.string(),
   summary: z.string(),
-  args: z.record(z.unknown()),
+  args: z.record(z.string(), z.unknown()),
   taintFlags: z.array(z.string()),
 });
 

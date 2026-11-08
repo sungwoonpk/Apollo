@@ -20,17 +20,17 @@ export const SettingsSchema = z.object({
     .object({
       edge: orbEdgeSchema.default('right'),
       // per-display fraction (0..1) along the docked edge, keyed by display id
-      positions: z.record(z.string(), z.number().min(0).max(1)).default({}),
+      positions: z.record(z.string(), z.number().min(0).max(1)).prefault({}),
     })
-    .default({}),
+    .prefault({}),
   wake: z
     .object({
       enabled: z.boolean().default(true),
       sensitivity: z.number().min(0).max(1).default(0.5),
     })
-    .default({}),
-  ptt: z.object({ enabled: z.boolean().default(true) }).default({}),
-  tts: z.object({ voice: z.string().default('en-US-JennyNeural') }).default({}),
+    .prefault({}),
+  ptt: z.object({ enabled: z.boolean().default(true) }).prefault({}),
+  tts: z.object({ voice: z.string().default('en-US-JennyNeural') }).prefault({}),
   // H1 voice device + playback + follow-up settings
   voice: z
     .object({
@@ -47,7 +47,7 @@ export const SettingsSchema = z.object({
       // wake word, PTT, or a nudge/alert. 'dot' opts into the old idle dot.
       orbIdleMode: z.enum(['hidden', 'dot']).default('hidden'),
     })
-    .default({}),
+    .prefault({}),
   // PART K: Chat tab behavior
   chat: z
     .object({
@@ -61,7 +61,7 @@ export const SettingsSchema = z.object({
       /** null = the provider's catalog default. */
       model: z.string().nullable().default(null),
     })
-    .default({}),
+    .prefault({}),
   // PART K: Workspace launch behavior (absorbs the legacy top-level openWorkspaceOnLaunch)
   workspace: z
     .object({
@@ -69,13 +69,13 @@ export const SettingsSchema = z.object({
       defaultView: z.enum(['chat', 'today', 'calendar', 'notes']).default('today'),
       openOnLaunch: z.boolean().default(false),
     })
-    .default({}),
+    .prefault({}),
   usage: z
     .object({
       warnDailyAnthropicTokens: z.number().int().nullable().default(null), // null = no warning
     })
-    .default({}),
-  backup: z.object({ autoWeekly: z.boolean().default(true) }).default({}),
+    .prefault({}),
+  backup: z.object({ autoWeekly: z.boolean().default(true) }).prefault({}),
   /** Quiet hours: nudges and spoken alerts stay silent inside this window. */
   dnd: z
     .object({
@@ -83,7 +83,7 @@ export const SettingsSchema = z.object({
       startHH: z.number().int().min(0).max(23).default(22),
       endHH: z.number().int().min(0).max(23).default(8),
     })
-    .default({}),
+    .prefault({}),
   /**
    * Break reminders. Off by default: an assistant that interrupts you on a
    * timer you did not ask for is the behavior people uninstall. Respects quiet
@@ -96,9 +96,9 @@ export const SettingsSchema = z.object({
       /** Only remind while the user has actually been active. */
       onlyWhenActive: z.boolean().default(true),
     })
-    .default({}),
-  brief: z.object({ timeHHMM: z.string().regex(/^\d{2}:\d{2}$/).default('08:30') }).default({}),
-  history: z.object({ enabled: z.boolean().default(true) }).default({}),
+    .prefault({}),
+  brief: z.object({ timeHHMM: z.string().regex(/^\d{2}:\d{2}$/).default('08:30') }).prefault({}),
+  history: z.object({ enabled: z.boolean().default(true) }).prefault({}),
   /**
    * Skills: the user's own standing instructions, appended to the system
    * prompt when enabled. Same trust tier as a typed message — the user
@@ -127,8 +127,8 @@ export const SettingsSchema = z.object({
       llm: adapterModeSchema.default('auto'),
       embedder: adapterModeSchema.default('auto'), // G1: real when model files exist, else fake
     })
-    .default({}),
-  anthropic: z.object({ model: z.string().default('claude-sonnet-4-6') }).default({}),
+    .prefault({}),
+  anthropic: z.object({ model: z.string().default('claude-sonnet-4-6') }).prefault({}),
   // E1 user profile; replaces the pre-Part-E top-level home/units fields
   profile: z
     .object({
@@ -141,7 +141,7 @@ export const SettingsSchema = z.object({
       timeFormat: z.enum(['12h', '24h']).default('12h'),
       weekStart: z.enum(['monday', 'sunday']).default('sunday'),
     })
-    .default({}),
+    .prefault({}),
   // F1 proactive engine + quick capture
   proactive: z
     .object({
@@ -153,29 +153,29 @@ export const SettingsSchema = z.object({
           z.string(),
           z.object({
             enabled: z.boolean(),
-            params: z.record(z.string(), z.union([z.number(), z.string(), z.boolean()])).default({}),
+            params: z.record(z.string(), z.union([z.number(), z.string(), z.boolean()])).prefault({}),
           }),
         )
-        .default({}),
+        .prefault({}),
     })
-    .default({}),
+    .prefault({}),
   quickCapture: z
     .object({
       hotkey: z.string().default('CommandOrControl+Shift+N'),
       defaultType: z.enum(['note', 'todo']).default('note'),
     })
-    .default({}),
+    .prefault({}),
   memory: z
     .object({
       indexEnabled: z.boolean().default(true), // G7: Clear index disables until re-enabled
     })
-    .default({}),
+    .prefault({}),
   // I1 locale override for Intl formatting (null = follow OS)
   locale: z
     .object({
       region: z.string().nullable().default(null), // BCP-47, e.g. "en-US"; drives Intl formatting
     })
-    .default({}),
+    .prefault({}),
   // I1 local calendar collections for categorization/color
   calendars: z
     .object({
@@ -192,7 +192,7 @@ export const SettingsSchema = z.object({
         .default([{ id: 'default', name: 'Personal', color: '#D97757', kind: 'local', readOnly: false }]),
       defaultCalendarId: z.string().default('default'),
     })
-    .default({}),
+    .prefault({}),
   // I7 Google Calendar sync (master opt-in; inert when disabled)
   googleCalendar: z
     .object({
@@ -201,7 +201,7 @@ export const SettingsSchema = z.object({
       direction: z.enum(['read-only', 'two-way']).default('read-only'),
       lastSyncTs: z.number().nullable().default(null),
     })
-    .default({}),
+    .prefault({}),
   // I4 policy gate for the user-link egress lane
   allowLinkReading: z.boolean().default(true),
   // I6: one-time proactivity explainer has been shown

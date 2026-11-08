@@ -21,7 +21,7 @@ export const llmRequestSchema = z.object({
   system: z.string(),
   messages: z.array(z.object({ role: z.enum(['user', 'assistant']), content: z.array(llmContentBlockSchema) })),
   // Tool JSON is passed through to the provider; validated as a shape, not a schema.
-  tools: z.array(z.object({ name: z.string(), description: z.string(), input_schema: z.record(z.unknown()) })),
+  tools: z.array(z.object({ name: z.string(), description: z.string(), input_schema: z.record(z.string(), z.unknown()) })),
   maxTokens: z.number().int().min(1).max(8192),
   /** Omitted → anthropic, so every pre-multi-provider client keeps working. */
   provider: llmProviderIdSchema.optional(),
