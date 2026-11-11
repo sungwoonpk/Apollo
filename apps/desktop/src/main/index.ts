@@ -886,7 +886,8 @@ function boot(): void {
       // are actionable and disappear on their own.
       void opts;
       closeOnboardingWindow();
-      openWorkspace({ view: 'chat' }); // K4: finish opens the Workspace at Chat
+      // The app always starts on Home: the greeting, today's schedule, weather and news.
+      openWorkspace({ view: 'today' });
     },
     requestPermission: async (kind) => {
       if (process.platform !== 'darwin') return true;
