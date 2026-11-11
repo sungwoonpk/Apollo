@@ -489,3 +489,15 @@ The owner asked to finish the open backlog.
   not queue the matching sync operations. It is rare and was left alone.
 - **I6 (empty states).** Copy only: one line that says what to do next, plus one example
   prompt for Notes and Chats. No new surfaces and no sample data.
+
+## 2026-11-11 first screen and demo polish
+
+- Finishing onboarding used to open the Workspace on Chat (K4). It now opens Home, like
+  every other entry point and the default view, so the first thing anyone sees is the
+  greeting, the day's schedule, weather and news. The demo GIF starts there too.
+- The greeting on the empty Chat screen is smaller (22 to 32px, was up to 44px).
+- Demo mode now also reports the voice key as configured, so no "assistant isn't set
+  up" banner shows. Both markers are inert: the real speech recognizer is never used in
+  demo mode, and the demo assistant makes no requests.
+- The demo GIF is re-recorded: it starts on Home, and the events it creates are always
+  later than the time of recording so no "start time is in the past" warning shows.
