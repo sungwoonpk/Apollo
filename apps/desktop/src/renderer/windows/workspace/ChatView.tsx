@@ -304,7 +304,7 @@ export function ChatView({ settings, initialConvId }: ChatViewProps): React.JSX.
 }
 
 const heroHeadingStyle: React.CSSProperties = {
-  fontFamily: 'var(--font-display)', fontSize: 'clamp(28px, 4vw, 44px)', fontWeight: 400,
+  fontFamily: 'var(--font-display)', fontSize: 'clamp(22px, 3vw, 32px)', fontWeight: 400,
   color: 'var(--text-1)', display: 'flex', alignItems: 'center', justifyContent: 'center',
   gap: 'var(--sp-3)', lineHeight: 1.15,
 };
