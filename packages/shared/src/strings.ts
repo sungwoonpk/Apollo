@@ -623,7 +623,7 @@ export const STRINGS = {
     // K2: the Chat sidebar (the H5.5 read-only Chats view is superseded by PART K)
     chats: {
       filter: 'Filter conversations…',
-      empty: 'No conversations yet.',
+      empty: 'No conversations yet. Ask Apollo something by voice or in the box below and it shows up here.',
       delete: 'Delete',
       deleteConfirm: 'Delete this conversation and its indexed messages?',
     },
@@ -679,10 +679,10 @@ export const STRINGS = {
       weather: 'Weather',
       news: "Today's news",
       refresh: 'Refresh',
-      emptyEvents: 'No events today.',
+      emptyEvents: 'Nothing scheduled today. Enjoy the open time.',
       emptyWeather: 'Add your location to see the weather.',
       setLocation: 'Set your location',
-      emptyNews: 'No headlines right now.',
+      emptyNews: 'No headlines right now. Try Refresh in a moment.',
       newEvent: 'New event',
     },
     calendar: {
@@ -761,8 +761,8 @@ export const STRINGS = {
       delete: 'Delete',
       deletedToast: 'Note deleted.',
       undo: 'Undo',
-      empty: 'No notes yet.',
-      emptyEditor: 'Select a note or create a new one.',
+      empty: 'No notes yet. Press New note, or tell Apollo "Note: call the dentist".',
+      emptyEditor: 'Select a note, or press New note to start writing.',
       placeholder: 'Start writing…',
       previewFailed: "Couldn't load a preview for that link.",
     },
