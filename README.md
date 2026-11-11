@@ -1,321 +1,67 @@
 # Apollo
 
-An always-available desktop AI assistant with exactly two surfaces. A small orb
-docks at the edge of your screen — say **"Hey Apollo"** or hold push-to-talk
-(**Option+Space** on macOS, **Alt+Space** on Windows) and speak. For typing,
-the Workspace opens on a **Chat** tab: a persistent conversational thread with
-streaming replies, inline cards, and your conversation history. Voice and text
-are one brain: a spoken exchange shows up live in the open Chat thread, and a
-typed follow-up continues the same conversation — calendar, reminders, timers,
-alarms, notes, todos, email, news, weather, web questions, opening apps,
-system control.
+A desktop AI assistant that stays out of your way. A small orb sits at the edge of your screen. Say "Hey Apollo", or hold a key and talk. Or open the Workspace and type. Voice and text share one conversation.
 
-Local-first: all your data lives in a local SQLite database. Apollo only reaches
-the network for the allowlisted hosts shown in **Settings → Privacy**.
+Local-first: your data lives in a SQLite file on your machine, and the app only talks to the hosts listed in Settings, Privacy.
 
-## Requirements
+![Apollo demo](docs/images/demo.gif)
 
-- **Node 20+** (developed on Node 22) and **pnpm 10+**
-- **macOS** or **Windows** (primary dev target is the current machine's OS)
-- Python 3 + Xcode Command Line Tools (macOS) for building `better-sqlite3`
+## Why
 
-## Quick start (development)
+Most assistants live in a browser tab. Apollo lives where you work, answers in a sentence, and keeps its hands to itself: anything risky waits for your confirmation, and nothing leaves the computer unless you can see where it goes.
+
+## What it does
+
+| | |
+|---|---|
+| **Talk or type** | Wake word, push-to-talk, or the Chat tab. A spoken exchange shows up live in the open thread. |
+| **Plan your day** | Calendar with month, week and agenda views, recurring events, optional Google Calendar sync. Reminders, timers and alarms. |
+| **Keep notes** | Notes with search and autosave, quick capture from anywhere in two seconds, no model involved. |
+| **Stay informed** | Today view with your schedule, weather and headlines. Voice answers for news and briefs. |
+| **Remember** | On-device semantic memory over your notes and chats. Nothing is uploaded to build it. |
+| **Stay safe** | Risky actions need your confirmation in code, untrusted text cannot trigger them, and every outside request is checked against an allowlist. |
+
+## Screenshots
+
+| Light | Dark |
+|---|---|
+| ![Home, light](docs/images/home.png) | ![Home, dark](docs/images/home-dark.png) |
+| ![Chat, light](docs/images/chat.png) | ![Chat, dark](docs/images/chat-dark.png) |
+| ![Calendar](docs/images/calendar.png) | ![Notes](docs/images/notes.png) |
+
+## Try it
+
+Needs Node 20+ (developed on 22), pnpm 10+, and macOS or Windows.
 
 ```bash
 pnpm install
-pnpm dev            # launches the tray app (orb + Workspace)
+APOLLO_DEMO=1 pnpm dev      # no accounts, no keys, no network
 ```
 
-> If your shell sets `ELECTRON_RUN_AS_NODE` (some CI/agent shells do), unset it for
-> dev: `env -u ELECTRON_RUN_AS_NODE pnpm dev`.
+Demo mode runs entirely on made-up data. A scripted assistant answers a few everyday requests (events, reminders, notes, list items, "what's on my calendar tomorrow?") and the weather and headlines are built in. It only exists in development builds and never reads real keys.
 
-On first run, a 4-step onboarding walks you through permissions and keys. Without
-any keys, Apollo still runs on **Fake adapters**: timers, notes, calendar,
-reminders, the fast path, and text replies all work locally; networked and
-LLM-backed features show a clear "add a key" message until you provide one.
+Plain `pnpm dev` starts the real app. Without keys it falls back to local adapters, so timers, notes, calendar and reminders still work. If your shell sets `ELECTRON_RUN_AS_NODE`, start it with `env -u ELECTRON_RUN_AS_NODE pnpm dev`.
 
-Open the Workspace (tray icon) and type **"set a timer for 5 minutes"** in the
-Chat tab to see a live card.
+## Checks
 
-## Accounts and modes
-
-Apollo runs in one of two modes. Which one is active is decided at boot and
-logged (`operating mode: …`); the orchestrator, tools, and voice code are
-identical in both, because the transport is selected behind the `LlmClient`
-interface.
-
-**Managed (the default, and what a real user gets).** You sign in to an Apollo
-account and inference is proxied by the Apollo backend. No provider keys ever
-touch the device, and there is no Keys tab. Sign-in happens in Apollo's own UI
-(**Settings → Account**) — a native form, not a browser hand-off and not an
-embedded web view. See DECISIONS.md for why this departs from RFC 8252 and what
-it costs. The backend is not deployed yet, so managed sign-in cannot succeed
-until it is; that is tracked in **HUMAN_TODO.md**.
-
-**BYOK (the developer / self-host path).** Set `APOLLO_ALLOW_BYOK=true` *and*
-supply a real provider key, and Apollo calls the providers directly with your
-own keys. Both conditions are required — a managed build with a stray key stays
-managed, so a normal user can never be silently dropped onto direct provider
-calls. This is the mode the entire Phase 0–11 offline test story runs in, and it
-needs no account and no backend.
-
-The egress allowlist follows the mode: managed drops the direct provider hosts
-it can no longer authenticate to and adds the backend and identity-provider
-hosts from config, so a self-hosted deployment is permitted by configuration
-rather than a hardcoded domain.
-
-### Keys (BYOK only — Settings → Keys, or a `.env` at the repo root)
-
-Keys are stored write-only, encrypted with the OS keychain via Electron
-`safeStorage`; the renderer can set and test them but never read them. In
-managed mode this tab does not exist.
-
-| Provider | Env var | Purpose | Required |
-|----------|---------|---------|----------|
-| Anthropic | `ANTHROPIC_API_KEY` | the LLM brain | yes (for anything beyond the fast path) |
-| Deepgram | `DEEPGRAM_API_KEY` | speech-to-text | for voice input |
-| Picovoice | `PICOVOICE_ACCESS_KEY` | "Hey Apollo" wake word | optional (PTT works without it) |
-| Brave | `BRAVE_API_KEY` | web search | optional |
-| Google OAuth | `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` | Gmail | optional |
-
-Google Calendar and Gmail are per-user connections in both modes, so those stay
-here regardless.
-
-Model id comes from config key `anthropic.model` (default `claude-sonnet-4-6`),
-overridable via `ANTHROPIC_MODEL`. Backend and identity endpoints come from
-`APOLLO_BACKEND_URL`, `APOLLO_OIDC_AUTHORIZE_URL`, and `APOLLO_OIDC_CLIENT_ID`.
-See `.env.example`. Full setup steps for each account are in **HUMAN_TODO.md**.
-
-## Permissions (macOS)
-
-- **Microphone** — to hear you (requested during onboarding).
-- **Accessibility** — for `screen.context` (active window + selected text).
-  Grant in System Settings → Privacy & Security → Accessibility.
-
-## Voice
-
-- **Wake word**: "Hey Apollo" (dev builds fall back to the built-in "jarvis"
-  keyword until a custom `resources/hey_apollo.ppn` is trained on the Picovoice
-  console). **Push-to-talk** (the hotkey) always works with no wake engine.
-- TTS defaults to the keyless `msedge-tts` voice `en-US-JennyNeural`
-  (configurable in Settings → Voice).
-
-## Two surfaces, one brain
-
-Apollo has exactly two ways in, both reading and writing the **same** local repos:
-
-- **Orb** (voice) — docked at the screen edge; wake word or push-to-talk. Voice
-  answers for weather, news, briefs, and schedules render on the **Response
-  Stage**: a wider translucent panel with staggered rows, a temperature count-up,
-  and a best-effort accent bar on the line being spoken. **Open in chat**
-  deep-links a voice answer into its conversation so you can continue by typing;
-  the right-click menu offers **Open chat** and **Open Apollo** (Today).
-- **Workspace** — a full window (tray click, orb menu, `app.open`, or a card deep
-  link). **Chat** (the typed surface: message thread with streaming replies,
-  inline cards, per-message copy/regenerate/edit/speak, a conversation sidebar
-  with rename/pin/delete, dictation into the composer, Mod+1), **Today**
-  (up-next, schedule, reminders, todos, weather, latest brief), **Calendar**
-  (Month / Week with drag create-move-resize / Agenda; recurring edits prompt
-  *this event* vs *all events*), and **Notes** (FTS search, autosave, pin,
-  delete-with-undo).
-
-Because voice tools, the Chat tab, and the Workspace views all mutate the same repos,
-changes propagate live: an event created by voice appears in an open Calendar
-within one event-loop tick (a `DataBus` broadcasts `data.changed` to every
-window). Settings edits broadcast the same way — no restart to change units,
-time format, week start, or profile.
-
-## Proactive nudges (quiet by design)
-
-Apollo also notices things in your **own local data** and offers a small, polite
-nudge — a meeting starting soon, overdue to-dos, a busy tomorrow, stale email
-threads, rain before an event. Every rule is deterministic and local: **no LLM
-calls and no new network egress**. A **governor** enforces the Quiet invariant in
-code before anything reaches you: a per-day budget, Do-Not-Disturb hours,
-de-duplication, 20-minute spacing, deferral while you're talking or in
-fullscreen, batching into one card, and **auto-tune** (if you dismiss a rule's
-nudges five times, it offers to turn that rule off). Time-sensitive nudges are
-exempt from the budget but still respect DND (delivered silently). Turn any rule
-on/off by voice ("stop reminding me about meetings") or in **Settings →
-Proactive**.
-
-## Quick Capture
-
-A global-hotkey micro-window (**Ctrl/Cmd+Shift+N**) saves a thought as a note,
-to-do, or reminder in under two seconds, **with zero LLM involvement**. It
-classifies as you type — a future time turns it into a reminder (with the time
-phrase stripped), a leading `todo` or trailing `!` forces a to-do — and Tab
-cycles the type. It saves through the same repos, so a captured note is live in
-the Workspace and available to voice instantly, and it works fully offline.
-
-## Calendars & Google Calendar sync (opt-in)
-
-Events belong to **local calendar collections** (name + color from a fixed
-palette), managed in **Settings → Calendars**; new events land on your default
-calendar and every surface shows the calendar's color. **Google Calendar sync**
-is a strictly opt-in module (**Settings → Accounts → Connect Google Calendar**)
-that is completely inert until you enable it — no scopes requested, no background
-work, no UI beyond the connect entry. Once connected you pick which calendars to
-sync and the direction (read-only default, or two-way). Sync is incremental
-(Google `syncToken`, full re-sync on 410), expands recurrence into the same
-RRULE/EXDATE model, converts timezones, and pushes two-way edits with etag
-preconditions; an etag conflict never overwrites silently — it surfaces a
-**Keep mine / theirs / both** card. Disconnecting asks whether to keep synced
-events as local copies or remove them, then revokes the scope. It reuses the
-existing Google hosts and safeStorage — no new secret store. (Live Google sign-in
-is wired via the incremental PKCE flow; see HUMAN_TODO.)
-
-## Links & lightweight web reading
-
-When **you** give Apollo a URL and ask about it, the tier-1 `link.read` tool
-fetches and summarizes it — the **only** path allowed to reach arbitrary public
-hosts, and only for links you typed (same user-substring rule as email
-recipients). It is bounded in code: an **SSRF guard** resolves the host and
-rejects any private/loopback/link-local/metadata address, **re-validating at
-connect time and on every redirect hop** (DNS-rebinding safe); http/https only;
-2 fetches per turn; 5s timeout; 2MB cap; HTML reduced to readable text; non-HTML
-described, never returned raw. The result is wrapped `<data source="link">` and
-marked untrusted, so a hostile page can't trigger a Tier-3 action without your
-confirmation. Bare URLs in Notes get an inline **Preview** affordance.
-
-## Keyboard shortcuts
-
-A single **`?`** (or **Cmd/Ctrl+/**) anywhere in the Workspace opens a help sheet
-listing every shortcut, grouped by scope (Global, Workspace, Calendar, Notes,
-Voice). The list is generated from a single shortcuts registry that also drives
-the actual key bindings, so help and behavior can never drift.
-
-## Semantic memory & recall (on-device)
-
-Apollo remembers meaning, not just keywords. Your **notes, past conversations,
-and saved memory facts** are embedded on-device with a local MiniLM model
-(`@huggingface/transformers`) into a vector index inside the same SQLite file
-(`sqlite-vec`), so "what was that idea I noted about the startup last week" is
-answered by semantic search — **no network egress for embedding or retrieval,
-ever**. A background indexer chunks and embeds on the DataBus (debounced, and
-only while no turn is active and voice is idle); `recall.search` does hybrid
-vector + keyword ranking with a recency tilt; results are treated as untrusted
-(notes can hold pasted text). **Cmd/Ctrl+K** in the Workspace opens an
-omnisearch across Notes, Events, and Facts.
-
-Memory facts dedupe by meaning (a near-duplicate updates in place; a
-contradiction replaces and is undoable). Everything is controllable in
-**Settings → Privacy → Memory index** (live counts, size on disk, Rebuild,
-Clear); turning off conversation history immediately purges indexed chats.
-
-The model is fetched **only at build time** by `pnpm --filter @apollo/desktop
-fetch-models` (23 MB quantized ONNX; SHA-256 recorded in `DECISIONS.md`).
-Without it, Apollo runs on a deterministic Fake embedder, so all tests and CI
-need no model files.
-
-## Scripts
-
-| Command | What it does |
-|---------|--------------|
-| `pnpm dev` | run the app in development |
-| `pnpm -r typecheck` | TypeScript strict check across packages |
-| `pnpm lint` | ESLint (no `any`, no `console`, hook rules) |
-| `pnpm -r test` | all unit/integration suites (Vitest) |
-| `pnpm eval` | agent eval harness against the real LLM (skips without a key) |
-| `pnpm --filter @apollo/desktop fetch-models` | download the on-device embedding model (build time only) |
-| `pnpm --filter @apollo/desktop package` | build installable artifacts into `apps/desktop/release/` |
-
-Tests run under the Node ABI and dev/packaging under the Electron ABI; the
-`native-abi.mjs` script swaps `better-sqlite3`'s binary automatically via the
-`pretest`/`predev`/`prepackage` hooks.
-
-## Architecture map
-
-```
-apollo/
-  packages/shared/         cross-module contracts (types, zod schemas, strings, IPC table)
-  apps/desktop/
-    src/main/              Electron main process
-      index.ts             composition root: wires everything below
-      ipc/                 generic zod-validated IPC router + handlers
-      agent/               orchestrator (hand-written loop), fast path, time resolver,
-                           taint + confirmation gates, system prompt, LLM adapters
-      tools/               the tool catalog (calendar, timers, email, weather, brief, …)
-                           + registry; every tool ships tests beside it
-      voice/               VoiceController FSM, Deepgram/Fake STT, edge/Fake TTS, chunker
-      audio-worker/        utilityProcess: wake adapters + Silero VAD
-      db/                  better-sqlite3 connection, numbered migrations, repos (only SQL),
-                           DataBus (live cross-surface sync)
-      net/                 httpClient + egress allowlist + circuit breaker + offline probe
-      security/            secrets (safeStorage), email sanitizer, Gmail OAuth + provider
-      scheduler/           timer/reminder/alarm scheduler + daily brief
-      proactive/           deterministic rules + governor (Quiet pipeline) + engine + controller
-      quickCapture/        classifier + save-path service (note/todo/reminder, zero LLM)
-      workspace/           Today-view data provider (weather strip + latest brief)
-    src/preload/           the single typed window.apollo bridge
-    src/renderer/          orb, workspace (Chat/Today/Calendar/Notes), settings, onboarding, audio windows
-                           (React + zustand); lib/ holds pure calendar/stage/debounce logic
-  eval/                    golden.jsonl (agent eval), injection/ (prompt-injection suite)
+```bash
+pnpm lint && pnpm typecheck && pnpm test
 ```
 
-### How a turn flows
+CI runs the same gates plus a dependency audit on macOS and Windows.
 
-1. **Renderer** sends `agent.userMessage` over the one preload bridge.
-2. **IPC router** validates the payload with zod and verifies the sender frame.
-3. **Orchestrator** tries the **fast path** (C9) — pure templates, no LLM. On a
-   miss it streams from Anthropic with the full tool set.
-4. Tool-use blocks are validated, executed (Tier 1/2 in parallel), and their
-   results fed back. **Tier 3** actions (e.g. `email.send`) are **code-gated**
-   behind a confirmation that no prompt can disable; untrusted content taints the
-   turn and flags unstated recipients/URLs/paths red in the confirm card.
-5. Sentences stream to **TTS**; the orb plays audio and shows compact cards.
+## Docs
 
-## Security posture (highlights)
+| | |
+|---|---|
+| [Setup](docs/setup.md) | Modes, accounts, keys, permissions |
+| [Features](docs/features.md) | Voice, Workspace, nudges, quick capture, calendars, memory |
+| [Architecture](docs/architecture.md) | Code layout, how a turn flows, security, data safety |
+| [Development](docs/development.md) | Scripts and the native module ABI |
+| [Decisions](DECISIONS.md) | Why things are the way they are |
+| [Spec](SPEC.md), [Progress](PROGRESS.md), [Backlog](BACKLOG.md) | Scope, status, what is left |
+| [Human to-do](HUMAN_TODO.md) | The steps that need a person, such as accounts and signing |
 
-- Every window: `contextIsolation`, `sandbox`, `nodeIntegration:false`, strict CSP.
-- Secrets never touch the renderer, disk in plaintext, or the logs (pino redaction).
-- No `child_process.exec`; OS commands are fixed templates with validated args
-  via `spawn(shell:false)` (CI grep-gate enforces this).
-- Prompt-injection defense is structural (Tier 3 gate + taint + `<data>` wrapping)
-  and covered by a 100%-required injection suite.
-- Network egress is restricted to a verbatim allowlist shown in Settings → Privacy.
-- Packaged builds flip Electron **fuses** (RunAsNode off, cookie encryption on,
-  load-app-from-ASAR only, macOS ASAR integrity) — verified in an afterPack hook
-  that fails the build on any mismatch.
-- Every web permission request is denied; only the audio window's dedicated
-  session may use the microphone. IPC is per-channel **rate-limited** (token bucket).
-- An **action log** records every external (Tier 3) action and undo for the user's
-  own accountability trail (recipients visible, message bodies never).
+## Status
 
-## Trust & data safety (Phase 8)
-
-- **Backups**: automatic before every migration, weekly, or on demand
-  (`VACUUM INTO`, newest-5-per-reason retention). A corrupt database is detected
-  at boot (`PRAGMA quick_check`), quarantined, and the newest backup restored.
-- **Export / import**: a zip of notes (`.md`), `calendar.ics`, todos/reminders/
-  facts JSON, and settings — **secrets and OAuth tokens are provably excluded**.
-- **On-device networking** goes through Electron `net.fetch` (system proxy, PAC,
-  OS cert store) while keeping the breaker + egress allowlist; a CI **egress
-  canary** proves no unexpected host is ever contacted.
-- **Usage metering** (Anthropic tokens, Deepgram seconds, TTS characters) with a
-  Diagnostics panel and an optional once-a-day over-limit warning.
-- **Conversations** rotate after 30 min idle (one shared brain for voice + chat),
-  a **follow-up window** lets you keep talking without the wake word, "repeat that"
-  replays the last reply, and the **Chat** tab reads/continues/renames/pins/deletes
-  history (delete purges its semantic-index chunks too).
-- **Alerts** that actually alert: a ringing overlay with snooze/dismiss, a volume
-  ramp for alarms, DND-aware silence, and notification routing.
-- Boot budget `boot_to_tray` p95 < 2500 ms (measured ~260 ms), asserted by
-  `pnpm --filter @apollo/desktop boot-bench`; heavy subsystems (embedder, audio
-  worker, Workspace window) initialize lazily.
-
-## Status & remaining human steps
-
-Phases 0–10 are complete and committed. Phase 10 was a dedicated **audit &
-stabilize** pass (no new features): a three-pass review of the whole codebase
-that fixed every S1/S2 defect it found — disk-full write handling, wall-clock /
-resume resilience, DNS-rebinding protection for `link.read`, unicode-safe
-truncation, an O(n²) chunking blow-up, malformed-RRULE rejection, and the
-follow-up/nudge FSM priority — each locked by a regression test. The findings and
-their dispositions are in **AUDIT.md**; a committed fresh-DB schema snapshot,
-`strings-inventory.md`, and `BACKLOG.md` accompany it.
-
-Everything the agent could build and self-verify is done and tested. The only
-open items require a human account, payment, certificate, physical microphone, or
-subjective copy/a11y judgment — listed precisely in **HUMAN_TODO.md**. Decisions
-are logged in **DECISIONS.md**; milestone status in **PROGRESS.md**.
+Built phase by phase and committed with tests. The remaining items need a person: accounts, certificates, a physical microphone, Windows hardware. They are listed in [HUMAN_TODO.md](HUMAN_TODO.md). The managed backend is not deployed yet, so account sign-in cannot succeed until it is.
