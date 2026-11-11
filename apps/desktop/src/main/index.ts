@@ -36,7 +36,7 @@ import { createMemoryTools } from './tools/memory';
 import { createUndoTool } from './tools/undo';
 import { createCalendarTools } from './tools/calendar';
 import { createReminderTools } from './tools/reminder';
-import { createNewsTool, createLlmSummarizer, DEFAULT_FEEDS } from './tools/news';
+import { createNewsTool, createLlmSummarizer, DEFAULT_FEEDS, fetchHeadlines } from './tools/news';
 import { createFilesTool } from './tools/files';
 import { createSystemTools, spawnRunner } from './tools/system';
 import { createWeatherTools } from './tools/weather';
@@ -232,7 +232,7 @@ function boot(): void {
     settings.patch({
       profile: {
         ...settings.get().profile,
-        name: 'Sungwoon',
+        name: 'Park',
         homePlace: { label: 'San Francisco, California', lat: 37.77, lon: -122.42, tz: 'America/Los_Angeles' },
       },
     });
@@ -466,6 +466,7 @@ function boot(): void {
     getHome: () => settings.get().profile.homePlace,
     getUnits: () => settings.get().profile.units,
     getLatestBrief: () => lastBriefCard,
+    getNews: () => fetchHeadlines({ http, feeds: repos.feeds }, 5),
   });
 
   // E3 Workspace: single instance, bounds persisted in the settings blob under a
