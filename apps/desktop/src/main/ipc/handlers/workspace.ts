@@ -15,6 +15,14 @@ export interface WorkspaceHandlerDeps {
   openWorkspace: (target: InvokeReq<'workspace.open'>) => void;
   /** J1.2: events created without an explicit calendar land on the configured default. */
   defaultCalendarId?: () => string;
+  /**
+   * I7: moves an event across the local/synced boundary through the sync engine
+   * (queues the remote delete or create). Returns false when sync is not active,
+   * in which case the caller falls back to a plain calendar change.
+   */
+  moveEvent?: (eventId: string, toCalendarId: string) => boolean;
+  /** I7: true for a calendar that cannot take local events (a read-only Google calendar). */
+  isReadOnlyCalendar?: (calendarId: string) => boolean;
   log: (msg: string) => void;
 }
 
@@ -49,8 +57,28 @@ registerInverse('workspace.note.delete', (r, d) => {
 
 type PatchReq = InvokeReq<'events.update'>['patch'];
 
+const isSynced = (calendarId: string): boolean => calendarId.startsWith('google:');
+
 export function buildWorkspaceHandlers(deps: WorkspaceHandlerDeps) {
   const { repos } = deps;
+
+  /** The target calendar when the patch moves the event between a local and a synced calendar (either way), else null. */
+  function boundaryTarget(cur: EventRow, patch: PatchReq): string | null {
+    const to = patch.calendarId;
+    return to !== undefined && to !== cur.calendarId && (isSynced(to) || isSynced(cur.calendarId)) ? to : null;
+  }
+
+  function rejectReadOnlyTarget(cur: EventRow, patch: PatchReq): void {
+    const to = patch.calendarId;
+    if (to !== undefined && to !== cur.calendarId && deps.isReadOnlyCalendar?.(to)) {
+      throw new Error('That calendar is read-only, so events cannot be moved onto it.');
+    }
+  }
+
+  /** Lands the event on its new calendar; the engine does it when sync is on, a plain update otherwise. */
+  function moveToCalendar(id: string, toCalendarId: string): void {
+    if (!deps.moveEvent?.(id, toCalendarId)) repos.events.update(id, { calendarId: toCalendarId });
+  }
 
   function resolvePatch(cur: EventRow, patch: PatchReq): Partial<EventRow> {
     const tz = patch.tz ?? cur.tz;
@@ -126,7 +154,9 @@ export function buildWorkspaceHandlers(deps: WorkspaceHandlerDeps) {
         if (req.occStartTs === undefined) throw new Error('occStartTs required for scope single');
         const dateIso = DateTime.fromMillis(req.occStartTs, { zone: cur.tz }).toISODate();
         if (!dateIso) throw new Error('invalid occurrence');
-        const resolved = resolvePatch(cur, req.patch);
+        rejectReadOnlyTarget(cur, req.patch);
+        const moveTo = boundaryTarget(cur, req.patch);
+        const resolved = resolvePatch(cur, moveTo !== null ? { ...req.patch, calendarId: undefined } : req.patch);
         const dur = (cur.endTs ?? cur.startTs + 3_600_000) - cur.startTs;
         const startTs = resolved.startTs ?? req.occStartTs;
         repos.events.addExdate(cur.id, dateIso);
@@ -142,6 +172,7 @@ export function buildWorkspaceHandlers(deps: WorkspaceHandlerDeps) {
           reminderMin: resolved.reminderMin !== undefined ? resolved.reminderMin : cur.reminderMin,
           calendarId: resolved.calendarId ?? cur.calendarId,
         });
+        if (moveTo !== null) moveToCalendar(detached.id, moveTo);
         repos.undo.push({
           turnId: UI_CONV, convId: UI_CONV, tool: 'workspace.event.detach',
           data: { parentId: cur.id, dateIso, detachedId: detached.id },
@@ -153,8 +184,14 @@ export function buildWorkspaceHandlers(deps: WorkspaceHandlerDeps) {
         title: cur.title, startTs: cur.startTs, endTs: cur.endTs, tz: cur.tz, allDay: cur.allDay,
         rrule: cur.rrule, location: cur.location, notes: cur.notes, reminderMin: cur.reminderMin, calendarId: cur.calendarId,
       };
-      const next = repos.events.update(req.id, resolvePatch(cur, req.patch));
+      rejectReadOnlyTarget(cur, req.patch);
+      const moveTo = boundaryTarget(cur, req.patch);
+      let next = repos.events.update(req.id, resolvePatch(cur, moveTo !== null ? { ...req.patch, calendarId: undefined } : req.patch));
       if (!next) throw new Error('event not found');
+      if (moveTo !== null) {
+        moveToCalendar(req.id, moveTo);
+        next = repos.events.get(req.id) ?? next;
+      }
       repos.undo.push({ turnId: UI_CONV, convId: UI_CONV, tool: 'workspace.event.update', data: { id: cur.id, prev } });
       return evToDTO(next);
     },

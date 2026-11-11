@@ -41,6 +41,10 @@ export interface HandlerDeps {
   googleDisconnect?: (keepLocal: boolean) => Promise<void>;
   googleSync?: () => Promise<InvokeRes<'google.sync'>>;
   googleResolveConflict?: (req: InvokeReq<'google.resolveConflict'>) => void;
+  /** I7: cross-boundary event move through the Google sync engine (false when sync is off). */
+  moveEvent?: (eventId: string, toCalendarId: string) => boolean;
+  /** I7: true for a calendar that cannot take local events. */
+  isReadOnlyCalendar?: (calendarId: string) => boolean;
   /** K2 "Speak this": read a message aloud through the TTS pipeline. */
   speakText?: (text: string) => void;
   /** K2 dictation-into-composer: returns false when STT/mic is unavailable. */
@@ -105,6 +109,8 @@ export function buildHandlers(deps: HandlerDeps): Handlers {
       tz: deps.tz ?? (() => Intl.DateTimeFormat().resolvedOptions().timeZone),
       openWorkspace: (target) => deps.openWorkspace?.(target),
       defaultCalendarId: () => deps.settings.get().calendars.defaultCalendarId,
+      moveEvent: deps.moveEvent,
+      isReadOnlyCalendar: deps.isReadOnlyCalendar,
       log: deps.log,
     }),
     'settings.open': () => {

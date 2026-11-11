@@ -471,3 +471,21 @@ filled with made-up data (issue #1).
   `news.brief` and need no LLM.
 - Screenshots and the GIF in `docs/images/` come from a keyless temporary profile in
   demo mode, in light and dark.
+
+## 2026-11-11 backlog items I6 and I7
+
+The owner asked to finish the open backlog.
+
+- **I7 (calendar move in the event editor).** Changing the calendar in the editor used
+  to overwrite `calendar_id` only, which left a synced event with a stale remote copy
+  or a local event that never reached Google. `events.update` now hands a move between
+  a local and a synced (`google:`) calendar to the sync engine's `moveEvent`, and falls
+  back to a plain update when sync is off. Other edits in the same save still apply.
+  Recurring "this event" edits detach first and then move the detached copy.
+- **Read-only targets are refused**, with the reason shown in the editor. A synced
+  calendar counts as read-only when its collection is marked so or when sync direction
+  is read-only, because an event moved there could never sync. Create is unchanged.
+- **Known gap:** undo of a calendar move restores the old `calendar_id` locally but does
+  not queue the matching sync operations. It is rare and was left alone.
+- **I6 (empty states).** Copy only: one line that says what to do next, plus one example
+  prompt for Notes and Chats. No new surfaces and no sample data.

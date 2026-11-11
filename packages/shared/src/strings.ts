@@ -741,6 +741,7 @@ export const STRINGS = {
       cancel: 'Cancel',
       invalidRrule: 'That recurrence rule is not valid.',
       invalidTime: 'Please enter a valid start and end time.',
+      saveFailed: "Couldn't save the event.",
     },
     notes: {
       editorPlaceholder: 'Start writing, or press / for blocks…',

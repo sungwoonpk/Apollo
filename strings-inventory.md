@@ -5,7 +5,7 @@ Use this for the C10/C18 tone review (sentence case, no corporate filler, presen
 
 Regenerate with `node apps/desktop/scripts/gen-strings-inventory.mjs` after changing strings.ts.
 
-Total user-facing strings: 633 (550 literal, 83 templated)
+Total user-facing strings: 634 (551 literal, 83 templated)
 
 | key | copy |
 |-----|------|
@@ -607,6 +607,7 @@ Total user-facing strings: 633 (550 literal, 83 templated)
 | `workspace.editor.cancel` | "Cancel" |
 | `workspace.editor.invalidRrule` | "That recurrence rule is not valid." |
 | `workspace.editor.invalidTime` | "Please enter a valid start and end time." |
+| `workspace.editor.saveFailed` | "Couldn't save the event." |
 | `workspace.notes.editorPlaceholder` | "Start writing, or press / for blocks…" |
 | `workspace.notes.blockMenu` | "Insert a block" |
 | `workspace.notes.blockMenuEmpty` | "No matching block" |
