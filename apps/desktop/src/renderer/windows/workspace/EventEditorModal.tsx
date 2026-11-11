@@ -45,11 +45,14 @@ export function EventEditorModal({
   onSave,
   onDelete,
   onClose,
+  saveError,
 }: {
   initial: EditorInitial;
   onSave: (r: EditorResult) => void;
   onDelete?: () => void;
   onClose: () => void;
+  /** Why the last save was refused (for example a read-only calendar); shown above the buttons. */
+  saveError?: string | null;
 }): React.JSX.Element {
   const e = STRINGS.workspace.editor;
   const [title, setTitle] = useState(initial.title);
@@ -164,6 +167,8 @@ export function EventEditorModal({
       <Field label={e.reminder}>
         <input type="number" min={0} value={reminderMin} onChange={(ev) => setReminderMin(ev.target.value)} style={{ ...input, width: 120 }} />
       </Field>
+
+      {saveError ? <ErrorLine text={saveError} /> : null}
 
       <div style={{ display: 'flex', gap: 'var(--sp-2)', marginTop: 'var(--sp-4)', justifyContent: 'space-between' }}>
         <div>

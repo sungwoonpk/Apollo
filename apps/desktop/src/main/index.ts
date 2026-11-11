@@ -947,6 +947,14 @@ function boot(): void {
     googleDisconnect: (keepLocal) => gcal.disconnect(keepLocal),
     googleSync: () => gcal.sync(),
     googleResolveConflict: (req) => gcal.resolveConflict(req.eventId, req.choice),
+    moveEvent: (eventId, toCalendarId) => gcal.moveEvent(eventId, toCalendarId),
+    // A Google calendar the account can only read, or any synced calendar while sync is read-only,
+    // cannot take events created here: they would sit unsynced forever.
+    isReadOnlyCalendar: (calendarId) => {
+      const s = settings.get();
+      const cal = s.calendars.active.find((c) => c.id === calendarId);
+      return cal?.readOnly === true || (calendarId.startsWith('google:') && s.googleCalendar.direction === 'read-only');
+    },
     // K2 "Speak this": a typed conversation can be listened to on demand.
     speakText: (text) => {
       ttsPipeline.beginTurn();

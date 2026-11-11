@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { ipcErrorText } from '../../lib/ipcError';
 import { Icon } from '../../components/Icon';
 import { DateTime } from 'luxon';
 import { calendarColor, fmtDate, fmtDateIso, fmtRelative, fmtTime, STRINGS, type OccurrenceDTO, type Settings } from '@apollo/shared';
@@ -327,6 +328,7 @@ function EventEditorFlow({
   onDone: () => void;
 }): React.JSX.Element {
   const [pending, setPending] = useState<{ result: EditorResult; kind: 'save' | 'delete' } | null>(null);
+  const [saveError, setSaveError] = useState<string | null>(null);
 
   const commit = (result: EditorResult, scope: 'single' | 'all' | null): void => {
     if (state.mode === 'create') {
@@ -352,7 +354,12 @@ function EventEditorFlow({
         scope: scope ?? 'all',
         ...(state.initial.occStartTs !== undefined ? { occStartTs: state.initial.occStartTs } : {}),
       })
-      .then(onDone);
+      .then(onDone)
+      .catch((err: unknown) => {
+        // Stay open with the reason (for example a read-only calendar) instead of failing silently.
+        setPending(null);
+        setSaveError(ipcErrorText(err, STRINGS.workspace.editor.saveFailed));
+      });
   };
 
   const remove = (scope: 'single' | 'all' | null): void => {
@@ -378,6 +385,7 @@ function EventEditorFlow({
     <EventEditorModal
       initial={state.initial}
       onClose={onClose}
+      saveError={saveError}
       onSave={(result) => (state.mode === 'edit' && state.initial.isRecurring ? setPending({ result, kind: 'save' }) : commit(result, null))}
       onDelete={
         state.mode === 'edit'

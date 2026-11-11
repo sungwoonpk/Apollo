@@ -5,7 +5,7 @@ Use this for the C10/C18 tone review (sentence case, no corporate filler, presen
 
 Regenerate with `node apps/desktop/scripts/gen-strings-inventory.mjs` after changing strings.ts.
 
-Total user-facing strings: 633 (550 literal, 83 templated)
+Total user-facing strings: 634 (551 literal, 83 templated)
 
 | key | copy |
 |-----|------|
@@ -498,7 +498,7 @@ Total user-facing strings: 633 (550 literal, 83 templated)
 | `workspace.undo.undid` | _(template, 1 arg)_ |
 | `workspace.undo.nothing` | "Nothing to undo" |
 | `workspace.chats.filter` | "Filter conversations…" |
-| `workspace.chats.empty` | "No conversations yet." |
+| `workspace.chats.empty` | "No conversations yet. Ask Apollo something by voice or in the box below and it shows up here." |
 | `workspace.chats.delete` | "Delete" |
 | `workspace.chats.deleteConfirm` | "Delete this conversation and its indexed messages?" |
 | `workspace.chat.modelPicker` | "Model" |
@@ -551,10 +551,10 @@ Total user-facing strings: 633 (550 literal, 83 templated)
 | `workspace.today.weather` | "Weather" |
 | `workspace.today.news` | "Today's news" |
 | `workspace.today.refresh` | "Refresh" |
-| `workspace.today.emptyEvents` | "No events today." |
+| `workspace.today.emptyEvents` | "Nothing scheduled today. Enjoy the open time." |
 | `workspace.today.emptyWeather` | "Add your location to see the weather." |
 | `workspace.today.setLocation` | "Set your location" |
-| `workspace.today.emptyNews` | "No headlines right now." |
+| `workspace.today.emptyNews` | "No headlines right now. Try Refresh in a moment." |
 | `workspace.today.newEvent` | "New event" |
 | `workspace.calendar.month` | "Month" |
 | `workspace.calendar.week` | "Week" |
@@ -607,6 +607,7 @@ Total user-facing strings: 633 (550 literal, 83 templated)
 | `workspace.editor.cancel` | "Cancel" |
 | `workspace.editor.invalidRrule` | "That recurrence rule is not valid." |
 | `workspace.editor.invalidTime` | "Please enter a valid start and end time." |
+| `workspace.editor.saveFailed` | "Couldn't save the event." |
 | `workspace.notes.editorPlaceholder` | "Start writing, or press / for blocks…" |
 | `workspace.notes.blockMenu` | "Insert a block" |
 | `workspace.notes.blockMenuEmpty` | "No matching block" |
@@ -625,8 +626,8 @@ Total user-facing strings: 633 (550 literal, 83 templated)
 | `workspace.notes.delete` | "Delete" |
 | `workspace.notes.deletedToast` | "Note deleted." |
 | `workspace.notes.undo` | "Undo" |
-| `workspace.notes.empty` | "No notes yet." |
-| `workspace.notes.emptyEditor` | "Select a note or create a new one." |
+| `workspace.notes.empty` | "No notes yet. Press New note, or tell Apollo \"Note: call the dentist\"." |
+| `workspace.notes.emptyEditor` | "Select a note, or press New note to start writing." |
 | `workspace.notes.placeholder` | "Start writing…" |
 | `workspace.notes.previewFailed` | "Couldn't load a preview for that link." |
 | `workspace.omni.placeholder` | "Search notes, events, and memory…" |

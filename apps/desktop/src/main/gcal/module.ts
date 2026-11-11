@@ -121,6 +121,15 @@ export function createGCalModule(deps: GCalModuleDeps) {
       timer = null;
     },
 
+    /** I7: cross-boundary move from the event editor. False when sync is not usable, so the caller does a plain update. */
+    moveEvent(eventId: string, toCalendarId: string): boolean {
+      if (!enabled()) return false;
+      const client = deps.makeClient();
+      if (!client) return false;
+      engineFor(client).moveEvent(eventId, toCalendarId);
+      return true;
+    },
+
     resolveConflict(eventId: string, choice: 'mine' | 'theirs' | 'both'): void {
       const client = deps.makeClient();
       if (!client) return;
