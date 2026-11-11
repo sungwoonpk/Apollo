@@ -4,7 +4,7 @@ A desktop AI assistant that stays out of your way. A small orb sits at the edge 
 
 Local-first: your data lives in a SQLite file on your machine, and the app only talks to the hosts listed in Settings, Privacy.
 
-![Apollo demo](docs/images/demo.gif)
+![Apollo demo](docs/images/demo.gif?v=2)
 
 ## Why
 
