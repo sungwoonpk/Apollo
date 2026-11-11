@@ -242,7 +242,9 @@ function boot(): void {
   const secrets = createSecrets({
     settings: repos.settings,
     codec: safeStorageCodec(safeStorage),
-    env: demo ? { ANTHROPIC_API_KEY: 'demo-no-network' } : config.env,
+    // Both markers only make the app report the assistant and voice as set up, so no "add a key" banner
+    // shows. Neither is ever sent anywhere: the demo assistant makes no requests and STT stays fake.
+    env: demo ? { ANTHROPIC_API_KEY: 'demo-no-network', DEEPGRAM_API_KEY: 'demo-no-network' } : config.env,
     log,
   });
   const testKey = createKeyTester({ secrets, model: settings.get().anthropic.model });
@@ -603,7 +605,8 @@ function boot(): void {
   });
   const sttCredential = (): string | null | Promise<string | null> =>
     appMode === 'byok' ? secrets.get('deepgram') : managedSttToken();
-  const useRealStt = sttMode === 'real' || (sttMode === 'auto' && (appMode === 'managed' || secrets.get('deepgram') !== null));
+  // Demo mode never uses the real recognizer, whatever the setting says: the demo key is only a marker.
+  const useRealStt = !demo && (sttMode === 'real' || (sttMode === 'auto' && (appMode === 'managed' || secrets.get('deepgram') !== null)));
   const sttAdapter = useRealStt
     ? createDeepgramStt({ apiKey: sttCredential, resolveProxy: (url) => session.defaultSession.resolveProxy(url), log })
     : new FakeStt(loadVoiceFixtures());
