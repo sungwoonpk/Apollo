@@ -16,7 +16,6 @@ apollo/
       tools/               the tool catalog (calendar, timers, email, weather, brief, …)
                            + registry; every tool ships tests beside it
       voice/               VoiceController FSM, Deepgram/Fake STT, edge/Fake TTS, chunker
-      audio-worker/        utilityProcess: wake adapters + Silero VAD
       db/                  better-sqlite3 connection, numbered migrations, repos (only SQL),
                            DataBus (live cross-surface sync)
       net/                 httpClient + egress allowlist + circuit breaker + offline probe
@@ -24,7 +23,14 @@ apollo/
       scheduler/           timer/reminder/alarm scheduler + daily brief
       proactive/           deterministic rules + governor (Quiet pipeline) + engine + controller
       quickCapture/        classifier + save-path service (note/todo/reminder, zero LLM)
-      workspace/           Today-view data provider (weather strip + latest brief)
+      memory/              on-device embedder, chunker, indexer, hybrid recall
+      auth/                managed-mode session, sign-in flow, LLM transports (managed vs BYOK)
+      calendars/           local calendar collections (CRUD, default calendar)
+      gcal/                opt-in Google Calendar sync engine (inert until enabled)
+      notes/               list-note (checklist) helpers
+      data/                export / import
+      workspace/           Today-view data provider (weather strip + news headlines)
+    src/audio-worker/      utilityProcess: wake adapters + Silero VAD
     src/preload/           the single typed window.apollo bridge
     src/renderer/          orb, workspace (Chat/Today/Calendar/Notes), settings, onboarding, audio windows
                            (React + zustand); lib/ holds pure calendar/stage/debounce logic
