@@ -6,7 +6,7 @@ Everything else has been done or self-verified by the agent.
 ## Phase 11 / PART K Chat tab — subjective visual judgment
 Everything behavioral is covered by tests (shared thread, composer bindings, sidebar
 grouping, message actions, dictation, cleanup gates). What needs human eyes on a
-running app (`env -u ELECTRON_RUN_AS_NODE pnpm dev`, Workspace opens on Chat):
+running app (`env -u ELECTRON_RUN_AS_NODE pnpm dev`, Workspace opens on Home; open Chat from the rail):
 - Thread feel: user bubbles right / assistant plain left at 720px, streaming cursor,
   cards inline at full column width, auto-scroll + "Jump to latest" pill, the
   "Used: …" chip expansion, "Show N earlier" on long threads.
@@ -18,22 +18,23 @@ running app (`env -u ELECTRON_RUN_AS_NODE pnpm dev`, Workspace opens on Chat):
   exchange should appear live; type "cancel it" to continue the same conversation.
 - Orb: right-click menu (Open chat / Open Apollo), the ✻ Open-in-chat affordance on
   Stage and compact cards lands on the right conversation.
-- Onboarding finish now lands on Chat with the welcome note seeded; confirm the new
-  "Say Hey Apollo / type in the Chat tab" copy reads well.
+- Onboarding finish opens Home (the greeting, schedule, weather and news), like every other
+  entry point; there is no welcome note any more (see the comment in `finishOnboarding`).
+  Confirm the finish-screen copy reads well.
 
 ## Phase 9 / I5 conversation polish — visual QA
 Implemented and unit-covered where testable (tool-activity label map, retry-with-memory).
-The following are wired but need a human eye on a running app (open the orb + palette, run a
-few turns):
-- Tool-activity line: while a tool runs, the orb and palette show a friendly line
+The following are wired but need a human eye on a running app (open the orb and the Chat tab,
+run a few turns):
+- Tool-activity line: while a tool runs, the orb and the Chat thread show a friendly line
   ("Checking your calendar…", "Reading that page…"), never a raw tool name; it clears on result.
-- Interruptible thinking: a visible **Cancel** appears during the thinking state (orb + palette)
+- Interruptible thinking: a visible **Cancel** appears during the thinking state (orb + Chat)
   and stops the generation for text-mode users.
-- Streaming TTS controls (orb speaking state): **Stop** and **Replay-from-start** are wired.
-  NOT yet implemented (deferred): **Skip sentence** and the "sentence i of n" progress line for
-  long (>6 sentence) replies — these need per-sentence buffering in the audio player.
-- Copy/share: palette reply copy (existing), Notes "Copy" (text), event card "Copy as ICS".
-  A generic copy affordance on Stage/orb cards other than events is NOT yet added (deferred).
+- Streaming TTS controls (orb speaking state): **Stop**, **Skip sentence**, **Replay-from-start**
+  and the "sentence i of n" progress line for long (>6 sentence) replies are wired (their live
+  check is in the orb checklist below).
+- Copy/share: Chat reply copy, Notes "Copy" (text), event card "Copy as ICS".
+  A generic copy affordance on the Stage cards is NOT yet added (deferred).
 Confirm these read well and the deferred items are acceptable or file follow-ups.
 
 ## Phase 10 / J5.5 packaged-build security re-verification (needs CI packaging)
@@ -64,18 +65,18 @@ pass on each interactive surface:
 - **Contrast & focus rings** in both light and dark themes.
 
 ## Phase 9 / I6 empty states, onboarding, help — visual QA
-Structural pieces are done and tested (shortcuts registry single-source + help sheet, welcome-note
-seed, first-nudge explainer flag, keys-skipped banner, onboarding step indicator + sample-note opt-in).
+Structural pieces are done and tested (shortcuts registry single-source + help sheet,
+first-nudge explainer flag, keys-skipped banner, onboarding step indicator).
 Give these a human pass on a running app:
 - Shortcuts help sheet: press `?` or Cmd/Ctrl+/ in the Workspace — every binding shown matches actual
   behavior (they share the registry); scopes grouped Global/Workspace/Calendar/Notes/Voice.
-- Onboarding: run it fresh — "Step i of 6" indicator, Back preserves entered values, the sample-note
-  checkbox (default on) seeds a real welcome note, finish lands on Today; skip keys → the dismissible
-  banner appears in the Workspace.
+- Onboarding: run it fresh — "Step i of N" indicator (five steps in managed mode and in BYOK
+  without `APOLLO_SHOW_KEYS`), Back preserves entered values, finish lands on Home. In a BYOK
+  build the dismissible "assistant isn't set up yet" banner appears in the Workspace.
 - First proactive nudge ever: the one-time explainer note appears above it, then never again.
 - Omnisearch: before typing shows recent notes; a no-match query offers "Create a note: …".
-- Empty states NOT yet re-copyedited (still functional, basic wording): Today, Calendar, Notes, Chats
-  primary empty states could get the warmer one-liners the spec describes — low priority follow-up.
+- Empty states were re-copyedited on 2026-11-11 (BACKLOG I6): Chats, Today, news and Notes each
+  say what to do next in one line. Give the wording a read.
 
 ## Phase 9 / I7 Google Calendar sync — live account required
 The sync engine, mapping, conflict handling, disconnect, offline queue, and opt-in-inert behavior are
@@ -97,15 +98,16 @@ What genuinely needs a human + a real Google account:
 - Egress note: I7 added `www.googleapis.com` (Calendar API) to the allowlist — a first-party Google host,
   no wildcard. Confirm this is acceptable (see DECISIONS).
 
-## Manual verification script — palette & keys (0.6)
-The agent already smoke-verified boot + an end-to-end turn programmatically
-(`APOLLO_SMOKE=1 pnpm dev` prints `SMOKE_OK … e2e=turn-ok`). What remains human
-is look-and-feel only:
-- [ ] `pnpm dev` (unset ELECTRON_RUN_AS_NODE if your shell sets it): tray dot appears; Option+Space toggles the palette.
-- [ ] Type "set a timer for 5 minutes": reply appears instantly (fast path) with a live countdown card; Cancel works.
+## Manual verification script — boot, Chat and keys (0.6, rewritten for the Chat tab)
+The palette this script was written for was removed in Phase 11; typed requests now go through the
+Chat tab. The agent already smoke-verified boot + an end-to-end turn programmatically
+(`env -u ELECTRON_RUN_AS_NODE APOLLO_SMOKE=1 pnpm dev` prints `SMOKE_OK … e2e=turn-ok`). What remains
+human is look-and-feel only:
+- [ ] `env -u ELECTRON_RUN_AS_NODE pnpm dev`: the tray icon appears; clicking it opens the Workspace on Home.
+- [ ] In Chat, type "set a timer for 5 minutes": the reply appears instantly (fast path) with a live countdown card; Cancel works.
 - [ ] Type "what time is it": template reply, no LLM.
-- [ ] Any other question shows the "There's a problem with your Anthropic key" copy until a key is added (expected before 0.7).
-- [ ] Tray > Settings… > Keys: paste each key, press Test, see a green "Key works." line. Values are write-only (field clears).
+- [ ] Any other question shows the "The assistant isn't set up yet" copy until a key is added (BYOK) or you sign in (managed).
+- [ ] BYOK build only: Settings > Keys: paste each key, press Test, see a green "Key works." line. Values are write-only (field clears).
 
 ## Live-audio checklist (Phase 2) — requires a real room mic + speakers
 Everything the agent could automate is covered by `debug.injectAudio` (WAV → wake → listen → EOT),
@@ -206,15 +208,13 @@ model **once at build time** (it is never downloaded at runtime):
 - [ ] Onboarding on a fresh profile shows the Sign in step (not Keys) in managed mode, and is skippable — notes, calendar, and timers all work signed out.
 - [ ] Check `~/Library/Application Support/@apollo/desktop/logs/apollo.log` after all of the above: no password appears anywhere in it.
 
-## Reminder inline actions (Phase 12 / L3.2 — product decision needed)
-- [ ] `snoozeReminder` and `completeReminder` work end to end in the repo layer and are reachable by no control. Reminders currently fire as a plain OS notification with no buttons, and the inline actions E3.1 described lived on the To-dos surface that L2.4 removed. Decide where they belong — notification actions, a ringing overlay like timers/alarms, or a Today row — then wire and add the dispatch tests. Recorded in AUDIT-controls.md rather than deleted, because unlike the four defects fixed there this is missing UI, not dead code.
-
 ## Orb / control live-pass checklist (Phase 12 / L3.2 — needs a real desktop)
 - [ ] The orb is invisible at rest: launch, touch nothing, confirm no dot anywhere on screen. Say the wake word and confirm it appears without stealing focus from the app you were typing in.
 - [ ] Wake word still fires while hidden (this is the whole point of hidden ≠ muted).
 - [ ] Settings > orb idle mode "dot" brings back the always-present dot live, without a restart.
 - [ ] During a long spoken reply press Skip: it jumps to the next sentence with no gap and no network traffic. Press Replay: the reply restarts from its first sentence, and no new turn appears in the conversation.
 - [ ] A reply over 6 sentences shows the "i of n" progress line.
+- [ ] Set a reminder for a minute out. When it fires, the orb shows a quiet card (no sound) with Done and Snooze; Done completes the reminder, Snooze (10/30/60 minutes) re-fires it after the chosen time, and closing the card without Done leaves it pending (AUDIT-controls.md, "the reminder gap is closed").
 - [ ] From an email draft card, press Send: the confirm card appears in the SAME conversation, openable from the sidebar.
 
 ## API keys (app runs with Fake adapters until provided)

@@ -128,7 +128,7 @@ the To-dos surface removed in L2.4, and `pinCard` was a round trip to a `break;`
 because pinning is renderer-local state. Both are removed from
 `dataMutateSchema` and from the handler.
 
-## Known gap, not fixed here
+## Known gap (closed: see the follow-up below)
 
 `snoozeReminder` and `completeReminder` remain in `dataMutateSchema` with
 working repo methods and no control that dispatches them. Reminders currently
