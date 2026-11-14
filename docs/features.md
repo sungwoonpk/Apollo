@@ -17,17 +17,21 @@ Apollo has exactly two ways in, both reading and writing the **same** local repo
 - **Orb** (voice) — docked at the screen edge; wake word or push-to-talk. Voice
   answers for weather, news, briefs, and schedules render on the **Response
   Stage**: a wider translucent panel with staggered rows, a temperature count-up,
-  and a best-effort accent bar on the line being spoken. **Open in chat**
+  and a best-effort accent bar on the line being spoken. **Copy**
+  puts a Stage answer on the clipboard as plain text, and **Open in chat**
   deep-links a voice answer into its conversation so you can continue by typing;
   the right-click menu offers **Open chat** and **Open Apollo** (Today).
 - **Workspace** — a full window (tray click, orb menu, `app.open`, or a card deep
-  link). **Chat** (the typed surface: message thread with streaming replies,
-  inline cards, per-message copy/regenerate/edit/speak, a conversation sidebar
-  with rename/pin/delete, dictation into the composer, Mod+1), **Today**
-  (up-next, schedule, reminders, todos, weather, latest brief), **Calendar**
-  (Month / Week with drag create-move-resize / Agenda; recurring edits prompt
-  *this event* vs *all events*), and **Notes** (FTS search, autosave, pin,
-  delete-with-undo).
+  link) with four views in rail order. **Today** (Mod+1): a greeting, today's
+  schedule, weather and headlines, nothing else. **Chat** (Mod+2): the typed
+  surface, with a message thread and streaming replies, inline cards,
+  per-message copy/regenerate/edit/speak, a conversation sidebar with
+  rename/pin/delete, and dictation into the composer. **Calendar** (Mod+3):
+  Month / Week with drag create-move-resize / Agenda; recurring edits prompt
+  *this event* vs *all events*. **Notes** (Mod+4): a block editor (headings,
+  lists, checklists, tables), FTS search, autosave, pin, delete-with-undo.
+  There is no separate to-do list. "Add milk to my list" appends a checklist
+  item to your list note.
 
 Because voice tools, the Chat tab, and the Workspace views all mutate the same repos,
 changes propagate live: an event created by voice appears in an open Calendar
@@ -38,8 +42,8 @@ time format, week start, or profile.
 ## Proactive nudges (quiet by design)
 
 Apollo also notices things in your **own local data** and offers a small, polite
-nudge — a meeting starting soon, overdue to-dos, a busy tomorrow, stale email
-threads, rain before an event. Every rule is deterministic and local: **no LLM
+nudge — a meeting starting soon, a busy tomorrow, stale email threads, rain
+before an event. Every rule is deterministic and local: **no LLM
 calls and no new network egress**. A **governor** enforces the Quiet invariant in
 code before anything reaches you: a per-day budget, Do-Not-Disturb hours,
 de-duplication, 20-minute spacing, deferral while you're talking or in
@@ -54,15 +58,15 @@ Proactive**.
 A global-hotkey micro-window (**Ctrl/Cmd+Shift+N**) saves a thought as a note,
 to-do, or reminder in under two seconds, **with zero LLM involvement**. It
 classifies as you type — a future time turns it into a reminder (with the time
-phrase stripped), a leading `todo` or trailing `!` forces a to-do — and Tab
-cycles the type. It saves through the same repos, so a captured note is live in
+phrase stripped), a leading `todo` or trailing `!` forces a to-do (saved as a
+checklist item on your list note) — and Tab cycles the type. It saves through the same repos, so a captured note is live in
 the Workspace and available to voice instantly, and it works fully offline.
 
 ## Calendars & Google Calendar sync (opt-in)
 
-Events belong to **local calendar collections** (name + color from a fixed
-palette), managed in **Settings → Calendars**; new events land on your default
-calendar and every surface shows the calendar's color. **Google Calendar sync**
+Events belong to **local calendar collections**, managed in **Settings →
+Calendars**; new events land on your default calendar. Calendars are told apart
+by name and a neutral source dot, with no color picker. **Google Calendar sync**
 is a strictly opt-in module (**Settings → Accounts → Connect Google Calendar**)
 that is completely inert until you enable it — no scopes requested, no background
 work, no UI beyond the connect entry. Once connected you pick which calendars to
@@ -72,8 +76,10 @@ RRULE/EXDATE model, converts timezones, and pushes two-way edits with etag
 preconditions; an etag conflict never overwrites silently — it surfaces a
 **Keep mine / theirs / both** card. Disconnecting asks whether to keep synced
 events as local copies or remove them, then revokes the scope. It reuses the
-existing Google hosts and safeStorage — no new secret store. (Live Google sign-in
-is wired via the incremental PKCE flow; see HUMAN_TODO.)
+existing Google hosts and safeStorage — no new secret store. The sync engine is
+tested against a mocked Google client only. The live sign-in for the calendar
+scope is not wired yet: **Connect Google Calendar** answers that live Google
+sign-in isn't set up on this build. See HUMAN_TODO.
 
 ## Links & lightweight web reading
 

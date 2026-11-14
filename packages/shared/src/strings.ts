@@ -782,6 +782,7 @@ export const STRINGS = {
       news: 'Latest news',
       schedule: 'Your schedule',
       openInApollo: 'Open in Apollo',
+      copy: 'Copy',
     },
     appOpened: (view: string) => `Opened ${view}.`,
   },

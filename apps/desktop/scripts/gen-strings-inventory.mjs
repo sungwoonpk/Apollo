@@ -6,7 +6,8 @@ import { fileURLToPath } from 'node:url';
  * Regenerates strings-inventory.md from STRINGS (J6.4). The inventory backs the
  * C10/C18 tone review, so it has to track the real copy — it was hand-made once
  * and went stale the moment strings were added. Run it after touching
- * strings.ts: `node apps/desktop/scripts/gen-strings-inventory.mjs`.
+ * strings.ts: `pnpm strings:inventory`. It runs under vite-node because it imports
+ * strings.ts, which plain `node` cannot load before Node 22.18.
  *
  * Template functions are recorded by shape rather than value: calling them with
  * fake arguments would put invented copy in a document meant for review.
@@ -36,7 +37,7 @@ const body = [
   'Generated from packages/shared/src/strings.ts — the single source of user-facing copy (A5).',
   'Use this for the C10/C18 tone review (sentence case, no corporate filler, present tense).',
   '',
-  'Regenerate with `node apps/desktop/scripts/gen-strings-inventory.mjs` after changing strings.ts.',
+  'Regenerate with `pnpm strings:inventory` after changing strings.ts.',
   '',
   `Total user-facing strings: ${rows.length} (${literals} literal, ${templates} templated)`,
   '',

@@ -56,6 +56,7 @@ export const ORB_CONTROLS: readonly ControlSpec[] = [
   { id: 'card.pin', surface: 'card', label: 'Pin / unpin card' },
   { id: 'stage.openInApollo', surface: 'stage', label: 'Open in Apollo' },
   { id: 'stage.newsRow', surface: 'stage', label: 'News headline link' },
+  { id: 'stage.copy', surface: 'stage', label: 'Copy card text' },
   { id: 'confirm.approve', surface: 'confirm', label: 'Confirm' },
   { id: 'confirm.deny', surface: 'confirm', label: 'Cancel' },
   { id: 'confirm.batchApprove', surface: 'confirm', label: 'Confirm batch (with per-item denials)' },
@@ -128,6 +129,8 @@ export function controlDispatch(id: string, ctx: ControlContext = {}): Dispatch 
       return ctx.deepLink ? ipc('workspace.open', ctx.deepLink) : null;
     case 'stage.newsRow':
       return local('an https anchor; windows.ts setWindowOpenHandler routes it to shell.openExternal');
+    case 'stage.copy':
+      return local('writes the card text to the clipboard from the renderer; nothing is sent to main and nothing leaves the device');
 
     case 'confirm.approve':
       return ctx.confirmationId ? ipc('agent.confirm', { confirmationId: ctx.confirmationId, approved: true }) : null;

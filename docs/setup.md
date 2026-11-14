@@ -18,10 +18,11 @@ pnpm dev            # launches the tray app (orb + Workspace)
 > If your shell sets `ELECTRON_RUN_AS_NODE` (some CI/agent shells do), unset it for
 > dev: `env -u ELECTRON_RUN_AS_NODE pnpm dev`.
 
-On first run, a 4-step onboarding walks you through permissions and keys. Without
-any keys, Apollo still runs on **Fake adapters**: timers, notes, calendar,
-reminders, the fast path, and text replies all work locally; networked and
-LLM-backed features show a clear "add a key" message until you provide one.
+On first run, a short onboarding (welcome, sign-in or profile, permissions, wake
+word, try it) walks you through the setup. Without any keys, Apollo still runs on
+**Fake adapters**: timers, notes, calendar, reminders, the fast path, and local
+tools all work; features that need the assistant say it isn't set up yet until
+you provide a key (BYOK) or sign in (managed).
 
 Open the Workspace (tray icon) and type **"set a timer for 5 minutes"** in the
 Chat tab to see a live card.

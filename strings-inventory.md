@@ -3,9 +3,9 @@
 Generated from packages/shared/src/strings.ts — the single source of user-facing copy (A5).
 Use this for the C10/C18 tone review (sentence case, no corporate filler, present tense).
 
-Regenerate with `node apps/desktop/scripts/gen-strings-inventory.mjs` after changing strings.ts.
+Regenerate with `pnpm strings:inventory` after changing strings.ts.
 
-Total user-facing strings: 634 (551 literal, 83 templated)
+Total user-facing strings: 635 (552 literal, 83 templated)
 
 | key | copy |
 |-----|------|
@@ -642,4 +642,5 @@ Total user-facing strings: 634 (551 literal, 83 templated)
 | `workspace.stage.news` | "Latest news" |
 | `workspace.stage.schedule` | "Your schedule" |
 | `workspace.stage.openInApollo` | "Open in Apollo" |
+| `workspace.stage.copy` | "Copy" |
 | `workspace.appOpened` | _(template, 1 arg)_ |

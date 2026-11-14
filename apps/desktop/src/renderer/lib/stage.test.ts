@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { isStageCard, sentenceToRow, stageDeepLink, stageRowCount, stageTitle } from './stage';
+import { isStageCard, sentenceToRow, stageCopyText, stageDeepLink, stageRowCount, stageTitle } from './stage';
 import type { CardPayload } from '@apollo/shared';
 
 const news: CardPayload = { kind: 'newsList', items: [
@@ -70,5 +70,47 @@ describe('stageTitle + stageDeepLink', () => {
     expect(stageDeepLink(weather)).toEqual({ view: 'today' });
     expect(stageDeepLink(eventList)).toEqual({ view: 'calendar', dateIso: '2026-07-14' });
     expect(stageDeepLink(news)).toBeNull();
+  });
+});
+
+describe('stageCopyText (I5.4 copy action)', () => {
+  const ctx = { locale: 'en-US', timeFormat: '12h' as const };
+
+  it('starts with the Stage title and lists the weather the card shows', () => {
+    const w: CardPayload = {
+      ...(weather as Extract<CardPayload, { kind: 'weather' }>),
+      days: [{ dateIso: '2026-07-15', hiF: 88, loF: 70, condition: 'Sunny', precipPct: 0 }],
+    };
+    expect(stageCopyText(w, "Today's weather in Columbus", ctx)).toBe(
+      "Today's weather in Columbus\n80° Sunny\nWed: 88° / 70° Sunny",
+    );
+  });
+
+  it('keeps each headline with its source and link, since the link is what you copy a headline for', () => {
+    expect(stageCopyText(news, 'Latest news', ctx)).toBe(
+      'Latest news\nA (s)\nhttps://x/a\nB (s)\nhttps://x/b\nC (s)\nhttps://x/c',
+    );
+  });
+
+  it('puts the day and time on every event, in the event\'s own timezone', () => {
+    expect(stageCopyText(eventList, 'Your schedule', ctx)).toBe('Your schedule\nTue, Jul 14 · 9:00 AM · Standup');
+    const allDay: CardPayload = {
+      kind: 'eventList',
+      title: 'Today',
+      events: [{ ...(eventList as Extract<CardPayload, { kind: 'eventList' }>).events[0]!, allDay: true, title: 'Holiday' }],
+    };
+    expect(stageCopyText(allDay, 'Your schedule', ctx)).toBe('Your schedule\nTue, Jul 14 · All day · Holiday');
+  });
+
+  it('joins brief sections with a blank line and keeps nested cards readable', () => {
+    expect(stageCopyText(brief, 'Morning brief', ctx)).toBe('Morning brief\none\n\ntwo');
+    const nested: CardPayload = { kind: 'brief', sections: [{ kind: 'text', body: 'lead' }, news] };
+    expect(stageCopyText(nested, 'Morning brief', ctx)).toContain('lead\n\nA (s)\nhttps://x/a');
+  });
+
+  it('returns just the title for a card with nothing to copy, and never throws', () => {
+    const empty: CardPayload = { kind: 'newsList', items: [] };
+    expect(stageCopyText(empty, 'Latest news', ctx)).toBe('Latest news');
+    expect(stageCopyText({ kind: 'timer', id: 't', label: null, endsAt: 0 }, '', ctx)).toBe('');
   });
 });

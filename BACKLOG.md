@@ -9,5 +9,6 @@ _none yet — all Pass A S3 findings were fixed inline._
 _none open. Both items below were built on 2026-11-11 at the owner's request._
 
 ## Done
+- **Stage card copy (I5.4)**: a Copy button in the Stage header copies a weather, headlines, schedule or brief answer as plain text (`stageCopyText`, tested; control `stage.copy`, renderer-local, listed in AUDIT-controls.md). Compact orb cards other than events still have no copy action.
 - **Editor cross-boundary move UI (I7)**: the event editor's calendar picker now moves an event across the local/synced boundary through the sync engine (`moveEvent`), so a move onto a two-way calendar queues a remote create and a move off one queues a remote delete. Moving onto a read-only calendar is refused with a message in the editor. Tests in `ipc/handlers/workspaceMove.test.ts`.
 - **Warmer empty-state copy (I6)**: the Chats, Today, news and Notes empty states each say what to do next in one line, with one example prompt where it helps. All copy is in `strings.ts`.

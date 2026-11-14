@@ -71,6 +71,7 @@ rotting:
 | --- | --- | --- |
 | Open in Apollo | `stage.openInApollo` | `workspace.open` with the card's deep link; absent for kinds with no destination |
 | News headline | `stage.newsRow` | local: an `https` anchor. `hardenWindow` in `windows.ts` denies the child window and routes it to `shell.openExternal`, so it opens in the system browser and never in-app |
+| Copy | `stage.copy` | local: `navigator.clipboard.writeText` with `stageCopyText(card)`; no IPC, nothing leaves the device |
 
 ### Confirm and batch confirm (C11 gate)
 
@@ -128,7 +129,7 @@ the To-dos surface removed in L2.4, and `pinCard` was a round trip to a `break;`
 because pinning is renderer-local state. Both are removed from
 `dataMutateSchema` and from the handler.
 
-## Known gap, not fixed here
+## Known gap (closed: see the follow-up below)
 
 `snoozeReminder` and `completeReminder` remain in `dataMutateSchema` with
 working repo methods and no control that dispatches them. Reminders currently

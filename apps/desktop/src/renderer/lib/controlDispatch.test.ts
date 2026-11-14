@@ -85,6 +85,13 @@ describe('L3.2 cards', () => {
     expect(controlDispatch('stage.openInApollo', { deepLink: null })).toBeNull();
   });
 
+  it('Stage Copy is renderer-local, so it can never send a message to main', async () => {
+    const d = controlDispatch('stage.copy');
+    expect(d?.kind).toBe('local');
+    // fireControl returns false for a local control instead of reaching the bridge.
+    expect(await fireControl('stage.copy')).toBe(false);
+  });
+
   it('timer cancel and event delete hit data.mutate with their op', () => {
     expect(ipcOf(controlDispatch('timer.cancel', { id: 'tm1' }))).toEqual({
       channel: 'data.mutate',
