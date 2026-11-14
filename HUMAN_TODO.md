@@ -91,10 +91,11 @@ What genuinely needs a human + a real Google account:
 - **End-to-end verification** against a real calendar: connect, pick calendars + direction, confirm pull
   (incremental token, recurrence, timezones), two-way push with etag, a real conflict (edit the same
   event in two places) → the conflict card, disconnect keep-vs-remove, and offline queue flush.
-- **Editor cross-boundary move**: the atomic move (delete-here + create-there, queuing remote ops) is
-  implemented and tested in the engine (`moveEvent`), but the event editor's calendar picker currently
-  just changes calendar_id; wiring the picker to call the engine move for local↔synced transitions is a
-  follow-up.
+- **Editor cross-boundary move**: wired on 2026-11-11 (BACKLOG I7). The editor's calendar picker hands a
+  move between a local and a synced calendar to the engine's `moveEvent`, and refuses a read-only target.
+  It is tested against the mocked client only, so include it in the end-to-end pass above. Known gap
+  (DECISIONS, 2026-11-11): undoing a move restores the old `calendar_id` locally but does not queue the
+  matching sync operations.
 - Egress note: I7 added `www.googleapis.com` (Calendar API) to the allowlist — a first-party Google host,
   no wildcard. Confirm this is acceptable (see DECISIONS).
 
