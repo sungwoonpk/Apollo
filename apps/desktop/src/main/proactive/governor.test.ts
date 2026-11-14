@@ -261,11 +261,25 @@ describe('governor — master switch', () => {
 
 describe('governor — perf (F7)', () => {
   it('processes a 50-candidate batch in under 10ms', () => {
-    const h = harness();
-    h.settings.proactive.maxPerDay = 20;
-    const cands = Array.from({ length: 50 }, (_, i) => candidate({ urgency: 'time-sensitive', dedupeKey: `p${i}` }));
-    const t0 = performance.now();
-    h.gov.process(cands);
-    expect(performance.now() - t0).toBeLessThan(10);
+    // The F7 budget is about steady-state cost, so this takes the median of many
+    // runs after a few unrecorded warm-ups. A single cold call can spend 20ms on
+    // JIT and statement-cache setup on a shared CI runner, which says nothing about
+    // the pipeline itself (it made Windows CI fail twice, see issue #13).
+    const WARMUPS = 3;
+    const RUNS = 21;
+    const samples: number[] = [];
+    for (let run = 0; run < WARMUPS + RUNS; run++) {
+      db = openDb(':memory:'); // a fresh database each run keeps the runs independent
+      migrate(db);
+      const h = harness();
+      h.settings.proactive.maxPerDay = 20;
+      const cands = Array.from({ length: 50 }, (_, i) => candidate({ urgency: 'time-sensitive', dedupeKey: `p${i}` }));
+      const t0 = performance.now();
+      h.gov.process(cands);
+      const elapsed = performance.now() - t0;
+      if (run >= WARMUPS) samples.push(elapsed);
+    }
+    samples.sort((a, b) => a - b);
+    expect(samples[Math.floor(samples.length / 2)]).toBeLessThan(10);
   });
 });
