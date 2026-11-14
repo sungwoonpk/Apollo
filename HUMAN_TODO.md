@@ -33,9 +33,11 @@ run a few turns):
 - Streaming TTS controls (orb speaking state): **Stop**, **Skip sentence**, **Replay-from-start**
   and the "sentence i of n" progress line for long (>6 sentence) replies are wired (their live
   check is in the orb checklist below).
-- Copy/share: Chat reply copy, Notes "Copy" (text), event card "Copy as ICS".
-  A generic copy affordance on the Stage cards is NOT yet added (deferred).
-Confirm these read well and the deferred items are acceptable or file follow-ups.
+- Copy/share: Chat reply copy, Notes "Copy" (text), event card "Copy as ICS", and a **Copy** button
+  in the Stage header (weather, headlines, schedule, brief): paste it somewhere and check the text
+  reads well (headlines keep their links; events carry day and time). The small compact orb cards
+  (text, nudge) still have no copy button.
+Confirm these read well.
 
 ## Phase 10 / J5.5 packaged-build security re-verification (needs CI packaging)
 The fuse config and permission-lockdown logic are unit-tested and green. What needs a real packaged

@@ -17,7 +17,8 @@ Apollo has exactly two ways in, both reading and writing the **same** local repo
 - **Orb** (voice) — docked at the screen edge; wake word or push-to-talk. Voice
   answers for weather, news, briefs, and schedules render on the **Response
   Stage**: a wider translucent panel with staggered rows, a temperature count-up,
-  and a best-effort accent bar on the line being spoken. **Open in chat**
+  and a best-effort accent bar on the line being spoken. **Copy**
+  puts a Stage answer on the clipboard as plain text, and **Open in chat**
   deep-links a voice answer into its conversation so you can continue by typing;
   the right-click menu offers **Open chat** and **Open Apollo** (Today).
 - **Workspace** — a full window (tray click, orb menu, `app.open`, or a card deep
