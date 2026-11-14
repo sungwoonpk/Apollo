@@ -71,6 +71,7 @@ rotting:
 | --- | --- | --- |
 | Open in Apollo | `stage.openInApollo` | `workspace.open` with the card's deep link; absent for kinds with no destination |
 | News headline | `stage.newsRow` | local: an `https` anchor. `hardenWindow` in `windows.ts` denies the child window and routes it to `shell.openExternal`, so it opens in the system browser and never in-app |
+| Copy | `stage.copy` | local: `navigator.clipboard.writeText` with `stageCopyText(card)`; no IPC, nothing leaves the device |
 
 ### Confirm and batch confirm (C11 gate)
 

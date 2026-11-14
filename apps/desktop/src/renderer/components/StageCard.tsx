@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { fmtDateIso, STRINGS, type CardPayload } from '@apollo/shared';
 import { WeatherGlyph } from './WeatherGlyph';
-import { sentenceToRow, stageDeepLink, stageRowCount, stageTitle } from '../lib/stage';
+import { sentenceToRow, stageCopyText, stageDeepLink, stageRowCount, stageTitle } from '../lib/stage';
 import { fireControl } from '../lib/controlDispatch';
 
 /**
@@ -22,13 +22,27 @@ export function StageCard({ card, spokenIndex }: { card: CardPayload; spokenInde
     void fireControl('stage.openInApollo', { deepLink });
   };
 
+  // I5.4: stage.copy is renderer-local (see controlDispatch), so it writes the
+  // clipboard directly and never touches the IPC bridge.
+  const [copied, setCopied] = useState(false);
+  const copyCard = (): void => {
+    void navigator.clipboard
+      .writeText(stageCopyText(card, title))
+      .then(() => {
+        setCopied(true);
+        window.setTimeout(() => setCopied(false), 1500);
+      })
+      .catch(() => undefined); // a refused clipboard write leaves the label as "Copy"
+  };
+
   return (
     <div className="apollo-stage" style={stageSurface}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 'var(--sp-3)' }}>
         <div style={{ fontSize: 'var(--fs-caption)', textTransform: 'uppercase', letterSpacing: 0.6, color: 'var(--text-3)' }}>{title}</div>
-        {deepLink ? (
-          <button onClick={openInApollo} style={openBtn}>{t.openInApollo}</button>
-        ) : null}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-3)' }}>
+          <button onClick={copyCard} style={openBtn}>{copied ? STRINGS.cards.copied : t.copy}</button>
+          {deepLink ? <button onClick={openInApollo} style={openBtn}>{t.openInApollo}</button> : null}
+        </div>
       </div>
       <StageBody card={card} highlightRow={highlightRow} />
     </div>
